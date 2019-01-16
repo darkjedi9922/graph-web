@@ -1,9 +1,15 @@
-const defaultNodeText = "1"
-const node = <div className="graph__node">{defaultNodeText}</div>;
+function Node(props) {
+    return (<div className="graph__node">{props.text}</div>);
+}
+
+Node.defaultNodeText = "1";
 
 // Это дело !Заменяет (зачем-то) (или удаляет) все элементы, которые уже
 // были в контейнере
 ReactDOM.render(
-    node, // JSX что рисовать
-    document.getElementById("graph-react") // Где рисовать
+    <div className="graph__nodes">
+        {Node({text: Node.defaultNodeText})}
+        {Node({text: "2"})}
+    </div>,
+    document.getElementById("graph-react")
 );

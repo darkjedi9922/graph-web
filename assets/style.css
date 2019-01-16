@@ -354,4 +354,5 @@ template {
     color: white;
     line-height: 50px;
     font-size: 20px;
+    display: inline-block;
 }
