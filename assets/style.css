@@ -343,7 +343,12 @@ template {
 /* ====== Graph ===== */
 
 .graph {
-    margin: 20px;
+    padding: 10px;
+}
+.graph__nodes {
+    width: 100%;
+    height: 150px;
+    border: solid 1px black;
 }
 .graph__node {
     width: 50px;
