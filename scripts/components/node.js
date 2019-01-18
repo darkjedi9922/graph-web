@@ -9,18 +9,12 @@ class Node extends React.Component {
         const y = this.props.y || 0;
 
         return (
-            <div 
-                className="graph__node" 
-                style={{
-                    position: "relative",
-                    top: y + "px",
-                    left: x + "px"
-                }}
-                onMouseDown={this.props.onMouseDown}
-                onMouseUp={this.props.onMouseUp}
-            >
-                {this.props.text}
-            </div>
+            <g>
+                <circle r="25" cx={x} cy={y} onMouseDown={this.props.onMouseDown}
+                    onMouseUp={this.props.onMouseUp} />
+                <text x={x} y={y} textAnchor="middle" alignmentBaseline="central" 
+                    fill="white">{this.props.text}</text>
+            </g>
         );
     }
 }
@@ -40,7 +34,6 @@ class Graph extends React.Component {
             cursorStartY: null,
             listener: null
         };
-        //this.movingNodeIntervalId = null;
     }
 
     render() {
@@ -60,9 +53,9 @@ class Graph extends React.Component {
 
         return (
             <div className="graph">
-                <div className="graph__nodes">
+                <svg className="graph__nodes">
                     {nodes}
-                </div>
+                </svg>
                 <button 
                     className="graph__button graph__button--add-node"
                     onClick={this.addNode.bind(this)}>
