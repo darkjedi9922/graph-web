@@ -342,6 +342,9 @@ template {
 
 /* ====== Graph ===== */
 
+html, body {
+    height: 100%;
+}
 .graph {
     padding: 10px;
 }
