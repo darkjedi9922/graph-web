@@ -26,14 +26,7 @@ class Graph extends React.Component {
             nodes: {}
         };
         this.nextId = 1;
-        this.movingNode = {
-            id: null,
-            startX: null,
-            startY: null,
-            cursorStartX: null,
-            cursorStartY: null,
-            listener: null
-        };
+        this.movingNode = null;
     }
 
     render() {
@@ -81,22 +74,24 @@ class Graph extends React.Component {
     }
 
     nodePressed(node, event) {
-        this.movingNode.id = node.id;
-        this.movingNode.startX = node.x;
-        this.movingNode.startY = node.y;
-        this.movingNode.cursorStartX = event.screenX;
-        this.movingNode.cursorStartY = event.screenY;
+        this.movingNode = {
+            id: node.id,
+            startX: node.x,
+            startY: node.y,
+            cursorStartX: event.clientX,
+            cursorStartY: event.clientY
+        }
 
         this.movingNode.listener = (function (event) {
             // Почему-то обработчик события все еще пытается сработать иногда,
             // не смотря на то, что он уже как-бы удален...
-            if (this.movingNode.id === null) return;
+            if (this.movingNode === null) return;
 
             this.setState((state, props) => ({
                 nodes: (function () {
                     const node = state.nodes[this.movingNode.id];
-                    const diffX = event.screenX - this.movingNode.cursorStartX;
-                    const diffY = event.screenY - this.movingNode.cursorStartY;
+                    const diffX = event.clientX - this.movingNode.cursorStartX;
+                    const diffY = event.clientY - this.movingNode.cursorStartY;
                     node.x = this.movingNode.startX + diffX;
                     node.y = this.movingNode.startY + diffY;
                     return state.nodes;
@@ -109,12 +104,7 @@ class Graph extends React.Component {
 
     nodeUnpressed(node, event) {
         document.body.removeEventListener('mousemove', this.movingNode.listener);
-        this.movingNode.id = null;
-        this.movingNode.startX = null;
-        this.movingNode.startY = null;
-        this.movingNode.cursorStartX = null;
-        this.movingNode.cursorStartY = null;
-        this.movingNode.listener = null;
+        this.movingNode = null;
     }
 }
 
