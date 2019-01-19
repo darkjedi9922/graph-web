@@ -3,20 +3,16 @@ class Node extends React.Component {
         super(props);
         this.id = props.id;
         this.moving = null;
-        const radius = this.props.radius || 25;
         this.state = {
-            radius: radius,
-            cx: this.props.x || radius,
-            cy: this.props.y || radius,
             text: props.text,
             editing: false
         }
     }
 
     render() {
-        const radius = this.state.radius;
-        const centerX = this.state.cx;
-        const centerY = this.state.cy;
+        const radius = this.props.radius || 25;
+        const centerX = this.props.cx || radius;
+        const centerY = this.props.cy || radius;
 
         return (
             <g>
@@ -58,9 +54,13 @@ class Node extends React.Component {
     }
 
     onMouseDown(event) {
+        // Мы будем говорить о "желании" переместиться через коллбек. Если коллбека
+        // нет, то и пытаться понять куда мы хотим перемещаться бессмысленно. 
+        if (!this.props.onMove) return;
+        
         this.moving = {
-            startX: this.state.cx,
-            startY: this.state.cy,
+            startX: this.props.cx,
+            startY: this.props.cy,
             cursorStartX: event.clientX,
             cursorStartY: event.clientY,
             listener: (function (e) {
@@ -70,11 +70,9 @@ class Node extends React.Component {
 
                 const diffX = e.clientX - this.moving.cursorStartX;
                 const diffY = e.clientY - this.moving.cursorStartY;
-
-                this.setState({
-                    cx: this.moving.startX + diffX,
-                    cy: this.moving.startY + diffY
-                });
+                const newCX = this.moving.startX + diffX;
+                const newCY = this.moving.startY + diffY;
+                this.props.onMove(newCX, newCY);
             }).bind(this)
         }
 
