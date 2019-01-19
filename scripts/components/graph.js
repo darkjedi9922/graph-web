@@ -7,6 +7,7 @@ class Graph extends React.Component {
         };
         this.nextNodeId = 1;
         this.nextEdgeId = 1;
+        this.edgeAdding = null;
     }
 
     render() {
@@ -14,7 +15,8 @@ class Graph extends React.Component {
         for (const id in this.state.nodes) {
             const node = this.state.nodes[id];
             nodes.push(<Node key={id} id={id} text={node.text} radius={node.radius}
-                cx={node.x} cy={node.y} onMove={this.moveNode.bind(this, id)} />);
+                cx={node.x} cy={node.y} onMove={this.moveNode.bind(this, id)}
+                onClick={this.onNodeClick.bind(this, id)} />);
         }
 
         const edges = [];
@@ -37,9 +39,36 @@ class Graph extends React.Component {
                     onClick={this.addNode.bind(this)}>
                     Добавить узел
                 </button>
-                <button onClick={this.addEdge.bind(this)}>Добавить ребро</button>
+                <button onClick={this.onAddEdgeClick.bind(this)}>
+                    Добавить ребро</button>
             </div>
         );
+    }
+
+    onAddEdgeClick() {
+        // Включаем состояние добавление ребра, и при клике на первый узел, он будет
+        // записан как стартовый узел добавляемого ребра.
+        this.edgeAdding = {
+            startNodeId: null,
+        }
+    }
+
+    onNodeClick(id) {
+        // Клик на узле вне режима добавления ребра ничего не дает.
+        if (this.edgeAdding === null) return;
+
+        if (this.edgeAdding.startNodeId === null) {
+            // Это первый узел, на который нажимаем в режиме добавления ребра (старт 
+            // еще не определен).
+            this.edgeAdding.startNodeId = id;
+        } else {
+            // Это второй узел - конец ребра. Дополнительных данных о добавлении
+            // ребра сохранять не нужно - просто добавлем ребро.
+            this.addEdge(this.edgeAdding.startNodeId, id);
+
+            // Ребро добавлено - выключаем режим добавления ребра.
+            this.edgeAdding = null;
+        }
     }
 
     moveNode(id, cx, cy) {
@@ -68,11 +97,10 @@ class Graph extends React.Component {
         }));
     }
 
-    addEdge() {
-        this.setState((function(state, props) {
-            const startNodeId = 1;
-            const endNodeId = 2;
+    addEdge(startNodeId, endNodeId) {
+        if (startNodeId === endNodeId) return;
 
+        this.setState((function(state, props) {
             const newEdge = {
                 startNodeId: startNodeId,
                 endNodeId: endNodeId

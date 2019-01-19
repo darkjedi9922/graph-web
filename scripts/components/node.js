@@ -19,11 +19,13 @@ class Node extends React.Component {
                 <circle r={radius} cx={centerX} cy={centerY} 
                     onMouseDown={this.onMouseDown.bind(this)}
                     onMouseUp={this.onMouseUp.bind(this)}
+                    onClick={this.props.onClick}
                     onDoubleClick={this.onDoubleClick.bind(this)} />
                 {!this.state.editing &&
                     <text x={centerX} y={centerY} fill="white"
                         textAnchor="middle" 
-                        alignmentBaseline="central"  
+                        alignmentBaseline="central"
+                        onClick={this.props.onClick}  
                         onDoubleClick={this.onDoubleClick.bind(this)}
                         onMouseDown={this.onMouseDown.bind(this)}
                         onMouseUp={this.onMouseUp.bind(this)} 
