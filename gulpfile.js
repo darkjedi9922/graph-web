@@ -1,22 +1,23 @@
 var gulp = require('gulp');
-var sass = require('gulp-sass');
+//ar sass = require('gulp-sass');
 var babel = require('gulp-babel');
-var minifyCss = require('gulp-clean-css');
-var autoprefixer = require('gulp-autoprefixer');
+var concat = require('gulp-concat');
+//var minifyCss = require('gulp-clean-css');
+//var autoprefixer = require('gulp-autoprefixer');
 
-const scssBlobs = [
-    'styles/*.scss',
-    'styles/*/*.scss',
-    'styles/*/*/*.scss'
-]
+// const scssBlobs = [
+//     'styles/*.scss',
+//     'styles/*/*.scss',
+//     'styles/*/*/*.scss'
+// ]
 
-gulp.task('scss', function() {
-    return gulp.src(scssBlobs)
-        .pipe(sass())
-        .pipe(minifyCss())
-        .pipe(autoprefixer())
-        .pipe(gulp.dest('assets/styles'));
-});
+// gulp.task('scss', function() {
+//     return gulp.src(scssBlobs)
+//         .pipe(sass())
+//         .pipe(minifyCss())
+//         .pipe(autoprefixer())
+//         .pipe(gulp.dest('assets/styles'));
+// });
 
 // ==== Babel ====
 
@@ -29,7 +30,8 @@ gulp.task('babel', () => {
         .pipe(babel({
             presets: ['@babel/env', '@babel/react']
         }))
-        .pipe(gulp.dest('assets/components'));
+        .pipe(concat('babel.js'))
+        .pipe(gulp.dest('assets'));
 })
 
 gulp.task('watch-babel', () => {
@@ -38,4 +40,4 @@ gulp.task('watch-babel', () => {
 
 // ==== Default ====
 
-gulp.task('default', gulp.parallel('babel', 'watch-babel'));
+gulp.task('default', gulp.parallel('watch-babel'));
