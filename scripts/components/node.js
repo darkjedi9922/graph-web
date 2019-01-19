@@ -2,32 +2,35 @@ class Node extends React.Component {
     constructor(props) {
         super(props);
         this.id = props.id;
+        this.moving = null;
+        const radius = this.props.radius || 25;
         this.state = {
+            radius: radius,
+            cx: this.props.x || radius,
+            cy: this.props.y || radius,
             text: props.text,
             editing: false
         }
     }
 
     render() {
-        // 25 - радиус, чтобы узлы появлялись в левом верхнем углу, но не были
-        // частично за границей svg из-за координат центра (0, 0).
-        const radius = 25;
-        const centerX = this.props.x || radius;
-        const centerY = this.props.y || radius;
+        const radius = this.state.radius;
+        const centerX = this.state.cx;
+        const centerY = this.state.cy;
 
         return (
             <g>
                 <circle r={radius} cx={centerX} cy={centerY} 
-                    onMouseDown={this.props.onMouseDown}
-                    onMouseUp={this.props.onMouseUp}
+                    onMouseDown={this.onMouseDown.bind(this)}
+                    onMouseUp={this.onMouseUp.bind(this)}
                     onDoubleClick={this.onDoubleClick.bind(this)} />
                 {!this.state.editing &&
                     <text x={centerX} y={centerY} fill="white"
                         textAnchor="middle" 
                         alignmentBaseline="central"  
                         onDoubleClick={this.onDoubleClick.bind(this)}
-                        onMouseDown={this.props.onMouseDown}
-                        onMouseUp={this.props.onMouseUp} 
+                        onMouseDown={this.onMouseDown.bind(this)}
+                        onMouseUp={this.onMouseUp.bind(this)} 
                         className="graph__node-text">
                         {this.state.text}
                     </text>
@@ -52,6 +55,35 @@ class Node extends React.Component {
                 }
             </g>
         );
+    }
+
+    onMouseDown(event) {
+        this.moving = {
+            startX: this.state.cx,
+            startY: this.state.cy,
+            cursorStartX: event.clientX,
+            cursorStartY: event.clientY,
+            listener: (function (e) {
+                // Почему-то обработчик события все еще пытается сработать иногда,
+                // не смотря на то, что он уже как-бы удален...
+                if (this.moving === null) return;
+
+                const diffX = e.clientX - this.moving.cursorStartX;
+                const diffY = e.clientY - this.moving.cursorStartY;
+
+                this.setState({
+                    cx: this.moving.startX + diffX,
+                    cy: this.moving.startY + diffY
+                });
+            }).bind(this)
+        }
+
+        document.body.addEventListener("mousemove", this.moving.listener);
+    }
+
+    onMouseUp() {
+        document.body.removeEventListener('mousemove', this.moving.listener);
+        this.moving = null;
     }
 
     onDoubleClick() {

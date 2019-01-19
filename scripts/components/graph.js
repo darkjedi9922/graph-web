@@ -5,7 +5,6 @@ class Graph extends React.Component {
             nodes: {}
         };
         this.nextId = 1;
-        this.movingNode = null;
     }
 
     render() {
@@ -16,10 +15,6 @@ class Graph extends React.Component {
                 key={id}
                 id={id}
                 text={node.text}
-                onMouseDown={this.nodePressed.bind(this, node)}
-                onMouseUp={this.nodeUnpressed.bind(this, node)}
-                x={node.x}
-                y={node.y}
             />);
         }
 
@@ -42,50 +37,12 @@ class Graph extends React.Component {
             nodes: (function () {
                 state.nodes[this.nextId] = {
                     id: this.nextId,
-                    text: this.nextId,
-                    // 25 - радиус, чтобы узлы появлялись в левом верхнем углу, но 
-                    // не были частично за границей svg из-за координат центра (0, 0).
-                    x: 25,
-                    y: 25
+                    text: this.nextId
                 };
                 this.nextId += 1;
                 return state.nodes;
             }).bind(this)()
         }));
-    }
-
-    nodePressed(node, event) {
-        this.movingNode = {
-            id: node.id,
-            startX: node.x,
-            startY: node.y,
-            cursorStartX: event.clientX,
-            cursorStartY: event.clientY
-        }
-
-        this.movingNode.listener = (function (event) {
-            // Почему-то обработчик события все еще пытается сработать иногда,
-            // не смотря на то, что он уже как-бы удален...
-            if (this.movingNode === null) return;
-
-            this.setState((state, props) => ({
-                nodes: (function () {
-                    const node = state.nodes[this.movingNode.id];
-                    const diffX = event.clientX - this.movingNode.cursorStartX;
-                    const diffY = event.clientY - this.movingNode.cursorStartY;
-                    node.x = this.movingNode.startX + diffX;
-                    node.y = this.movingNode.startY + diffY;
-                    return state.nodes;
-                }).bind(this)()
-            }));
-        }).bind(this);
-
-        document.body.addEventListener("mousemove", this.movingNode.listener);
-    }
-
-    nodeUnpressed(node, event) {
-        document.body.removeEventListener('mousemove', this.movingNode.listener);
-        this.movingNode = null;
     }
 }
 
