@@ -3,7 +3,8 @@ class Graph extends React.Component {
         super(props);
         this.state = {
             nodes: {},
-            edges: {}
+            edges: {},
+            oriented: false
         };
         this.nextNodeId = 1;
         this.nextEdgeId = 1;
@@ -26,7 +27,8 @@ class Graph extends React.Component {
             const endNode = this.state.nodes[edge.endNodeId];
             const start = { x: startNode.x, y: startNode.y }
             const end = { x: endNode.x, y: endNode.y }
-            edges.push(<Edge key={id} start={start} end={end} />);
+            edges.push(<Edge key={id} start={start} end={end} 
+                arrow={this.state.oriented} />);
         }
 
         return (
@@ -40,7 +42,12 @@ class Graph extends React.Component {
                     Добавить узел
                 </button>
                 <button onClick={this.onAddEdgeClick.bind(this)}>
-                    Добавить ребро</button>
+                    Добавить ребро
+                </button>
+                <span> Граф: </span>
+                <button onClick={this.toggleArrowEdges.bind(this)}>
+                    {this.state.oriented ? "Ориентированный" : "Неориентированный"}
+                </button>
             </div>
         );
     }
@@ -69,6 +76,10 @@ class Graph extends React.Component {
             // Ребро добавлено - выключаем режим добавления ребра.
             this.edgeAdding = null;
         }
+    }
+
+    toggleArrowEdges() {
+        this.setState((state, props) => ({ oriented: !state.oriented }));
     }
 
     moveNode(id, cx, cy) {
