@@ -28,7 +28,8 @@ class Graph extends React.Component {
             const start = { x: startNode.x, y: startNode.y }
             const end = { x: endNode.x, y: endNode.y }
             edges.push(<Edge key={id} start={start} end={end} 
-                arrow={this.state.oriented} />);
+                arrow={this.state.oriented} curve={edge.curve} 
+                onCurve={this.onEdgeCurve.bind(this, id)} />);
         }
 
         return (
@@ -78,6 +79,13 @@ class Graph extends React.Component {
         }
     }
 
+    onEdgeCurve(id, curve) {
+        this.setState(function(state, props) {
+            state.edges[id].curve = curve;
+            return state;
+        })
+    }
+
     toggleArrowEdges() {
         this.setState((state, props) => ({ oriented: !state.oriented }));
     }
@@ -114,7 +122,8 @@ class Graph extends React.Component {
         this.setState((function(state, props) {
             const newEdge = {
                 startNodeId: startNodeId,
-                endNodeId: endNodeId
+                endNodeId: endNodeId,
+                curve: 0
             }
             
             const newEdgeId = this.nextEdgeId++;

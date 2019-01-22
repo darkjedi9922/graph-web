@@ -82,6 +82,7 @@ class Node extends React.Component {
     }
 
     onMouseUp() {
+        if (!this.moving) return;
         document.body.removeEventListener('mousemove', this.moving.listener);
         this.moving = null;
     }
