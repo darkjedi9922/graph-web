@@ -17,8 +17,9 @@ class Edge extends React.Component {
         const curve = this.props.curve || 0;
         const arrowSize = 12.5;
         const nodeRadius = 25;
-        const length = this.calcLength();
-        const halfLength = length / 2;
+        const planeLength = this.calcLength();
+        const halfLength = planeLength / 2;
+        const text = this.props.text;
 
         // SVG rotate вращает не в ту сторону, потому значение с минусом.
         const degree = -this.calcDegree();
@@ -26,17 +27,17 @@ class Edge extends React.Component {
         const d = `M ${x1},${y1} c 0,0 0,${curve} ${halfLength},${curve} 
             s ${halfLength},${-curve} ${halfLength},${-curve}`;
 
+        // Для точных расчетов приходится использовать возможности браузера. 
+        // Если расчитывать точки на кривой вручную по формуле, то будут 
+        // неточности между ручным просчетом и тем, что рисует браузер, из-за 
+        // чего появляются баги и стрелка поворачивается не в соответствии с
+        // кривой.
+        const virtualPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        virtualPath.setAttribute('d', d);
+        const pathLength = virtualPath.getTotalLength();
+
         let arrowElement = null;
         if (this.props.arrow) {
-
-            // Для точных расчетов приходится использовать возможности браузера. 
-            // Если расчитывать точки на кривой вручную по формуле, то будут 
-            // неточности между ручным просчетом и тем, что рисует браузер, из-за 
-            // чего появляются баги и стрелка поворачивается не в соответствии с
-            // кривой.
-            const virtualPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            virtualPath.setAttribute('d', d);
-            const pathLength = virtualPath.getTotalLength();
             const arrowStart = virtualPath.getPointAtLength(pathLength - nodeRadius);
             const arrowEnd = virtualPath.getPointAtLength(pathLength - nodeRadius - arrowSize);
 
@@ -53,15 +54,36 @@ class Edge extends React.Component {
                 ${(arrowEnd.y + arrowSize * arrowNormal.y / (arrowSize * 2))}
                 ${(arrowEnd.x + arrowSize * -arrowNormal.x / (arrowSize * 2))},
                 ${(arrowEnd.y + arrowSize * -arrowNormal.y / (arrowSize * 2))}`}
-                  
             />
         }
+
+        // С учетом того, что вычислить ширину и высоту текста в js без добавления
+        // элементов в DOM нельзя, возьмем константные значения, которых точно должно
+        // хватить.
+        const textWidth = planeLength;
+        const fontSize = 12;
+        const textX = x1;
+        const textY = y1 + curve + (curve >= 0 ? 3 : -fontSize - 3 * 3);
+        const textUserSelect = "none";
 
         return (
             <g transform={"rotate(" + degree + " " + x1 + " " + y1 + ")"} >
                 <path fill="none" d={d} stroke="black" strokeWidth="2"
                     onMouseDown={this.onMouseDown} />
                 {arrowElement}
+                <foreignObject x={textX} y={textY} onMouseDown={this.onMouseDown}
+                    width={textWidth} height={fontSize}>
+                    <input defaultValue={text} disabled style={{
+                        background: "transparent",
+                        border: "none",
+                        textAlign: "center",
+                        height: fontSize + "px",
+                        width: textWidth + "px",
+                        fontSize: fontSize + "px",
+                        outline: "none",
+                        userSelect: textUserSelect
+                }} />
+                </foreignObject>
             </g>
         );
     }
