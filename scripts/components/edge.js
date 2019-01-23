@@ -57,33 +57,19 @@ class Edge extends React.Component {
             />
         }
 
-        // С учетом того, что вычислить ширину и высоту текста в js без добавления
-        // элементов в DOM нельзя, возьмем константные значения, которых точно должно
-        // хватить.
-        const textWidth = planeLength;
-        const fontSize = 12;
-        const textX = x1;
-        const textY = y1 + curve + (curve >= 0 ? 3 : -fontSize - 3 * 3);
-        const textUserSelect = "none";
+        const font = {
+            size: 12
+        };
+        const textX = x1 + planeLength / 2;
+        const textY = y1 + curve + (font.size * 1.2) / (curve > 0 ? 2 : -2);
 
         return (
             <g transform={"rotate(" + degree + " " + x1 + " " + y1 + ")"} >
                 <path fill="none" d={d} stroke="black" strokeWidth="2"
                     onMouseDown={this.onMouseDown} />
                 {arrowElement}
-                <foreignObject x={textX} y={textY} onMouseDown={this.onMouseDown}
-                    width={textWidth} height={fontSize}>
-                    <input defaultValue={text} disabled style={{
-                        background: "transparent",
-                        border: "none",
-                        textAlign: "center",
-                        height: fontSize + "px",
-                        width: textWidth + "px",
-                        fontSize: fontSize + "px",
-                        outline: "none",
-                        userSelect: textUserSelect
-                }} />
-                </foreignObject>
+                <EditableSvgText x={textX} y={textY} font={font} text={text} 
+                    onMouseDown={this.onMouseDown} />
             </g>
         );
     }
