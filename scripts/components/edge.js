@@ -6,6 +6,7 @@ class Edge extends React.Component {
         this.onMouseDown = this.onMouseDown.bind(this);
         this.onMouseMove = this.onMouseMove.bind(this);
         this.onMouseUp = this.onMouseUp.bind(this);
+        this.onTextChange = this.onTextChange.bind(this);
     }
 
     render() {
@@ -57,19 +58,22 @@ class Edge extends React.Component {
             />
         }
 
-        const font = {
-            size: 12
+        const fontSize = 12;
+        const textRect = {
+            x: x1,
+            y: y1 + curve + (curve > 0 ? 2 : - (fontSize + 2)),
+            width: planeLength,
+            height: fontSize
         };
-        const textX = x1 + planeLength / 2;
-        const textY = y1 + curve + (font.size * 1.2) / (curve > 0 ? 2 : -2);
 
         return (
             <g transform={"rotate(" + degree + " " + x1 + " " + y1 + ")"} >
                 <path fill="none" d={d} stroke="black" strokeWidth="2"
                     onMouseDown={this.onMouseDown} />
                 {arrowElement}
-                <EditableSvgText x={textX} y={textY} font={font} text={text} 
-                    onMouseDown={this.onMouseDown} />
+                <EditableSvgText text={text} rect={textRect} 
+                    onMouseDown={this.onMouseDown} 
+                    onTextChange={this.onTextChange} />
             </g>
         );
     }
@@ -118,6 +122,10 @@ class Edge extends React.Component {
         document.body.removeEventListener('mousemove', this.onMouseMove);
         document.body.removeEventListener('mouseup', this.onMouseUp);
         this.curving = null;
+    }
+
+    onTextChange(text) {
+        this.props.onTextChange && this.props.onTextChange(text);
     }
 
     _calcVectorDegree(start, end) {

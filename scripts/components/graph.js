@@ -29,7 +29,8 @@ class Graph extends React.Component {
             const end = { x: endNode.x, y: endNode.y }
             edges.push(<Edge key={id} start={start} end={end} 
                 arrow={this.state.oriented} curve={edge.curve} text={edge.text}
-                onCurve={this.onEdgeCurve.bind(this, id)} />);
+                onCurve={this.onEdgeCurve.bind(this, id)}
+                onTextChange={this.onEdgeTextChange.bind(this, id)} />);
         }
 
         return (
@@ -84,6 +85,13 @@ class Graph extends React.Component {
             state.edges[id].curve = curve;
             return state;
         })
+    }
+
+    onEdgeTextChange(id, text) {
+        this.setState(function(state, props) {
+            state.edges[id].text = text;
+            return state;
+        });
     }
 
     toggleArrowEdges() {
