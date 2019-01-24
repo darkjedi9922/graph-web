@@ -6,6 +6,7 @@ class EditableSvgText extends React.Component {
      *  edit is bool mode,
      *  style is styles to text (both svg and html styles in one object),
      *  className,
+     *  transform svg transform,
      *  onWillEdit callback,
      *  onDidEdit (text) => {} callback,
      *  onClick callback,
@@ -37,6 +38,7 @@ class EditableSvgText extends React.Component {
                     className={this.props.className} 
                     style={Object.assign({ userSelect: "none"}, this.props.style)}
                     textAnchor="middle" alignmentBaseline="central"
+                    transform={this.props.transform}
                     onDoubleClick={this.startEditing}
                     onMouseDown={this.props.onMouseDown}
                     onMouseUp={this.props.onMouseUp} 

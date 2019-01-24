@@ -23,9 +23,7 @@ class Edge extends React.Component {
         const planeLength = this.calcLength();
         const halfLength = planeLength / 2;
         const text = this.props.text;
-
-        // SVG rotate вращает не в ту сторону, потому значение с минусом.
-        const degree = -this.calcDegree();
+        const degree = this.calcDegree();
 
         const d = `M ${x1},${y1} c 0,0 0,${curve} ${halfLength},${curve} 
             s ${halfLength},${-curve} ${halfLength},${-curve}`;
@@ -71,13 +69,18 @@ class Edge extends React.Component {
         };
 
         return (
-            <g transform={"rotate(" + degree + " " + x1 + " " + y1 + ")"} >
+            <g transform={"rotate(" + -degree + " " + x1 + " " + y1 + ")"} >
                 <path fill="none" d={d} stroke="black" strokeWidth="2"
                     onMouseDown={this.onMouseDown} 
                     onDoubleClick={this.onTextWillEdit}
                 ></path>
                 {arrowElement}
                 <EditableSvgText text={text} rect={textRect} edit={this.state.edit}
+                    transform={`rotate(
+                        ${degree > 90 && degree < 270 ? 180 : 0} 
+                        ${textRect.x + textRect.width / 2} 
+                        ${textRect.y + textRect.height / 2}
+                    )`}
                     onMouseDown={this.onMouseDown}
                     onWillEdit={this.onTextWillEdit} 
                     onDidEdit={this.onTextDidEdit} />
