@@ -1,10 +1,17 @@
 class EditableSvgText extends React.Component {
     /**
-     * props.rect is {x, y, width, height}
-     * props.text is the text
-     * props.edit is bool mode
-     * props.onWillWillEdit callback
-     * props.onDidEdit callback
+     * props: {
+     *  rect is {x, y, width, height},
+     *  text is the text,
+     *  edit is bool mode,
+     *  style is styles to text (both svg and html styles in one object),
+     *  className,
+     *  onWillEdit callback,
+     *  onDidEdit (text) => {} callback,
+     *  onClick callback,
+     *  onMouseDown callback,
+     *  onMouseUp callback
+     * }
      */
     constructor(props) {
         super(props);
@@ -26,25 +33,33 @@ class EditableSvgText extends React.Component {
 
         return (<>
             {!this.props.edit ? 
-                <text x={rect.x + rect.width / 2} y={rect.y + rect.height / 2} 
-                    fill="black" style={{ userSelect: "none"}}
+                <text x={rect.x + rect.width / 2} y={rect.y + rect.height / 2}
+                    className={this.props.className} 
+                    style={Object.assign({ userSelect: "none"}, this.props.style)}
                     textAnchor="middle" alignmentBaseline="central"
+                    onDoubleClick={this.startEditing}
                     onMouseDown={this.props.onMouseDown}
-                    onDoubleClick={this.startEditing} >
+                    onMouseUp={this.props.onMouseUp} 
+                    onClick={this.props.onClick}
+                >
                     {text}
                 </text>
                 :
                 <foreignObject x={rect.x} y={rect.y}
                     onMouseDown={this.props.onMouseDown}
                     width={rect.width} height={rect.height}>
-                    <input defaultValue={text} ref={this.inputRef} style={{
+                    <input defaultValue={text} ref={this.inputRef} 
+                    className={this.props.className}
+                    style={Object.assign({
                         background: "transparent",
                         border: "none",
                         textAlign: "center",
                         height: "100%",
                         width: "100%",
                         outline: "none",
-                    }} onDoubleClick={this.startEditing} onBlur={this.stopEditing}
+                    }, this.props.style)} 
+                    onDoubleClick={this.startEditing} 
+                    onBlur={this.stopEditing}
                     onKeyDown={this.onKeyDown} />
                 </foreignObject>
             }

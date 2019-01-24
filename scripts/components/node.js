@@ -7,6 +7,9 @@ class Node extends React.Component {
             text: props.text,
             editing: false
         }
+
+        this.onTextWillEdit = this.onTextWillEdit.bind(this);
+        this.onTextChange = this.onTextChange.bind(this);
     }
 
     render() {
@@ -20,37 +23,23 @@ class Node extends React.Component {
                     onMouseDown={this.onMouseDown.bind(this)}
                     onMouseUp={this.onMouseUp.bind(this)}
                     onClick={this.props.onClick}
-                    onDoubleClick={this.onDoubleClick.bind(this)} />
-                {!this.state.editing &&
-                    <text x={centerX} y={centerY} fill="white"
-                        textAnchor="middle" 
-                        alignmentBaseline="central"
-                        onClick={this.props.onClick}  
-                        onDoubleClick={this.onDoubleClick.bind(this)}
-                        onMouseDown={this.onMouseDown.bind(this)}
-                        onMouseUp={this.onMouseUp.bind(this)} 
-                        className="graph__node-text">
-                        {this.state.text}
-                    </text>
-                }
-                {this.state.editing &&
-                    <foreignObject x={centerX - radius} y={centerY - radius} 
-                        width={2*radius} height={2*radius}>
-                        <input type="text" defaultValue={this.state.text} 
-                            style={{
-                                background: "transparent",
-                                color: "white",
-                                width: 2*radius,
-                                height: 2*radius,
-                                border: "none",
-                                textAlign: "center",
-                                outline: "none"
-                            }} 
-                            onBlur={this.textOnChange.bind(this)}
-                            onKeyDown={this.textOnKey.bind(this)} 
-                            ref={(input) => { this.editInput = input; }}/>
-                    </foreignObject>
-                }
+                    onDoubleClick={this.onTextWillEdit} />
+                <EditableSvgText text={this.state.text} edit={this.state.editing} 
+                    rect={{
+                        x: centerX - radius,
+                        y: centerY - radius,
+                        width: radius * 2,
+                        height: radius * 2
+                    }} className="graph__node-text" style={{
+                        fill: "white",
+                        color: "white"
+                    }}
+                    onClick={this.props.onClick}
+                    onMouseDown={this.onMouseDown.bind(this)}
+                    onMouseUp={this.onMouseUp.bind(this)}
+                    onWillEdit={this.onTextWillEdit}
+                    onDidEdit={this.onTextChange} 
+                />
             </g>
         );
     }
@@ -87,20 +76,14 @@ class Node extends React.Component {
         this.moving = null;
     }
 
-    onDoubleClick() {
-        this.setState({editing: true}, () => {
-            this.editInput.focus();
-        });
+    onTextWillEdit() {
+        this.setState({ editing: true });
     }
 
-    textOnChange(event) {
+    onTextChange(text) {
         this.setState({
-            text: event.target.value,
+            text: text,
             editing: false
         });
-    }
-
-    textOnKey(event) {
-        if (event.keyCode === 13) this.textOnChange(event);
     }
 }
