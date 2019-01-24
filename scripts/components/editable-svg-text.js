@@ -2,10 +2,12 @@ class EditableSvgText extends React.Component {
     /**
      * props.rect is {x, y, width, height}
      * props.text is the text
+     * props.edit is bool mode
+     * props.onWillWillEdit callback
+     * props.onDidEdit callback
      */
     constructor(props) {
         super(props);
-        this.state = { editing: false };
 
         this.inputRef = React.createRef();
 
@@ -14,12 +16,16 @@ class EditableSvgText extends React.Component {
         this.onKeyDown = this.onKeyDown.bind(this);
     }
 
+    componentDidUpdate() {
+        this.props.edit && this.inputRef.current.focus();
+    }
+
     render() {
         const rect = this.props.rect;
         const text = this.props.text;
 
         return (<>
-            {!this.state.editing ? 
+            {!this.props.edit ? 
                 <text x={rect.x + rect.width / 2} y={rect.y + rect.height / 2} 
                     fill="black" style={{ userSelect: "none"}}
                     textAnchor="middle" alignmentBaseline="central"
@@ -46,13 +52,12 @@ class EditableSvgText extends React.Component {
     }
 
     startEditing() {
-        this.setState({ editing: true }, () => { this.inputRef.current.focus() });
+        this.props.onWillEdit && this.props.onWillEdit();
     }
 
     stopEditing() {
         const newValue = this.inputRef.current.value;
-        this.props.onTextChange && this.props.onTextChange(newValue);
-        this.setState({ editing: false });
+        this.props.onDidEdit && this.props.onDidEdit(newValue);
     }
 
     onKeyDown(e) {

@@ -1,12 +1,14 @@
 class Edge extends React.Component {
     constructor(props) {
         super(props);
+        this.state = { edit: false };
         this.curving = null;
 
         this.onMouseDown = this.onMouseDown.bind(this);
         this.onMouseMove = this.onMouseMove.bind(this);
         this.onMouseUp = this.onMouseUp.bind(this);
-        this.onTextChange = this.onTextChange.bind(this);
+        this.onTextWillEdit = this.onTextWillEdit.bind(this);
+        this.onTextDidEdit = this.onTextDidEdit.bind(this);
     }
 
     render() {
@@ -71,9 +73,10 @@ class Edge extends React.Component {
                 <path fill="none" d={d} stroke="black" strokeWidth="2"
                     onMouseDown={this.onMouseDown} />
                 {arrowElement}
-                <EditableSvgText text={text} rect={textRect} 
-                    onMouseDown={this.onMouseDown} 
-                    onTextChange={this.onTextChange} />
+                <EditableSvgText text={text} rect={textRect} edit={this.state.edit}
+                    onMouseDown={this.onMouseDown}
+                    onWillEdit={this.onTextWillEdit} 
+                    onDidEdit={this.onTextDidEdit} />
             </g>
         );
     }
@@ -124,7 +127,12 @@ class Edge extends React.Component {
         this.curving = null;
     }
 
-    onTextChange(text) {
+    onTextWillEdit() {
+        this.setState({ edit: true });
+    }
+
+    onTextDidEdit(text) {
+        this.setState({ edit: false });
         this.props.onTextChange && this.props.onTextChange(text);
     }
 
