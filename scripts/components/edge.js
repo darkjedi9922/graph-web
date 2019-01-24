@@ -57,7 +57,9 @@ class Edge extends React.Component {
                 ${(arrowEnd.y + arrowSize * arrowNormal.y / (arrowSize * 2))}
                 ${(arrowEnd.x + arrowSize * -arrowNormal.x / (arrowSize * 2))},
                 ${(arrowEnd.y + arrowSize * -arrowNormal.y / (arrowSize * 2))}`}
-            />
+                onDoubleClick={this.onTextWillEdit}
+                onMouseDown={this.onMouseDown}
+            ></polygon>
         }
 
         const fontSize = 12;
@@ -71,7 +73,9 @@ class Edge extends React.Component {
         return (
             <g transform={"rotate(" + degree + " " + x1 + " " + y1 + ")"} >
                 <path fill="none" d={d} stroke="black" strokeWidth="2"
-                    onMouseDown={this.onMouseDown} />
+                    onMouseDown={this.onMouseDown} 
+                    onDoubleClick={this.onTextWillEdit}
+                ></path>
                 {arrowElement}
                 <EditableSvgText text={text} rect={textRect} edit={this.state.edit}
                     onMouseDown={this.onMouseDown}
