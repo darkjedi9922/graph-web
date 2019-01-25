@@ -22,7 +22,8 @@ var concat = require('gulp-concat');
 // ==== Babel ====
 
 const babelBlobs = [
-    'scripts/components/*.js'
+    'scripts/*.js',
+    'scripts/*/*.js'
 ]
 
 gulp.task('babel', () => {

@@ -2,3 +2,4 @@ node_modules
 libs
 styles
 assets/babel.js
+package-lock.json

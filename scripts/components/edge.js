@@ -39,25 +39,13 @@ class Edge extends React.Component {
 
         let arrowElement = null;
         if (this.props.arrow) {
-            const arrowStart = virtualPath.getPointAtLength(pathLength - nodeRadius);
-            const arrowEnd = virtualPath.getPointAtLength(pathLength - nodeRadius - arrowSize);
-
-            // Вычисляем крайние координаты точек стрелки через нормаль к вектору
-            // стрелки.
-            const arrowEndNormal = this._rotatePoint(arrowStart, arrowEnd, 90);
-            const arrowNormal = {
-                x: arrowEndNormal.x - arrowEnd.x,
-                y: arrowEndNormal.y - arrowEnd.y
-            }
-
-            arrowElement = <polygon points={`${arrowStart.x},${arrowStart.y}
-                ${(arrowEnd.x + arrowSize * arrowNormal.x / (arrowSize * 2))},
-                ${(arrowEnd.y + arrowSize * arrowNormal.y / (arrowSize * 2))}
-                ${(arrowEnd.x + arrowSize * -arrowNormal.x / (arrowSize * 2))},
-                ${(arrowEnd.y + arrowSize * -arrowNormal.y / (arrowSize * 2))}`}
+            const arrowEnd = virtualPath.getPointAtLength(pathLength - nodeRadius);
+            const arrowStart = virtualPath.getPointAtLength(pathLength - nodeRadius - arrowSize);
+            arrowElement = <SvgArrow vector={{start: arrowStart, end: arrowEnd}}
+                size={arrowSize}
                 onDoubleClick={this.onTextWillEdit}
                 onMouseDown={this.onMouseDown}
-            ></polygon>
+            />
         }
 
         const fontSize = 12;
@@ -89,11 +77,11 @@ class Edge extends React.Component {
     }
 
     calcDegree() {
-        return this._calcVectorDegree(this.props.start, this.props.end);
+        return calcVectorDegree(this.props.start, this.props.end);
     }
 
     calcLength() {
-        return this._calcVectorLength(this.props.start, this.props.end);
+        return calcVectorLength(this.props.start, this.props.end);
     }
 
     onMouseDown(e) {
@@ -102,7 +90,7 @@ class Edge extends React.Component {
         const eventX = e.clientX - 10;
         const eventY = e.clientY - 10;
         const degree = this.calcDegree();
-        const planeStart = this._rotatePoint({x: eventX, y: eventY}, start, degree);
+        const planeStart = rotatePoint({x: eventX, y: eventY}, start, degree);
         this.curving = {
             startX: eventX,
             startY: eventY,
@@ -122,7 +110,7 @@ class Edge extends React.Component {
         // TODO: Вычислять координату с учетом размещения холста.
         var x = e.offsetX;
         var y = e.offsetY;
-        const planeEventPoint = this._rotatePoint({x: x, y: y}, start, degree);
+        const planeEventPoint = rotatePoint({x: x, y: y}, start, degree);
 
         const curve = planeEventPoint.y - this.curving.planeStart.y;
         this.props.onCurve(this.curving.startCurve + curve);
@@ -141,36 +129,5 @@ class Edge extends React.Component {
     onTextDidEdit(text) {
         this.setState({ edit: false });
         this.props.onTextChange && this.props.onTextChange(text);
-    }
-
-    _calcVectorDegree(start, end) {
-        // Найдем угол через угол между вектором и его проекцией на ось Х.
-        const length = this._calcVectorLength(start, end);
-        const projectionLength = end.x - start.x;
-
-        // Градусов в радианах.
-        const DEG = 57.2958;
-
-        // При определенных условиях может выйти NaN, тогда просто вернем 0.
-        let result = (Math.acos(projectionLength / length) * DEG) || 0;
-
-        // В 3 и 4 четвертях косинус не расчитывает больше 180. Нужно это исправить.
-        if (end.y > start.y) return 360 - result;
-        return result;
-    }
-
-    _calcVectorLength(start, end) {
-        return Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2));
-    }
-
-    _rotatePoint(point, center, degree) {
-        const rad = 3.14 / 180 * degree;
-
-        return {
-            x: center.x + (point.x - center.x) * Math.cos(rad) - 
-                (point.y - center.y) * Math.sin(rad),
-            y: center.y + (point.y - center.y) * Math.cos(rad) + 
-                (point.x - center.x) * Math.sin(rad)
-        }
     }
 }
