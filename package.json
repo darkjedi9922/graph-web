@@ -2,9 +2,11 @@
   "name": "graph-web",
   "version": "1.0.0",
   "description": "",
-  "main": "index.html",
+  "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "gulp": "./node_modules/.bin/gulp",
+    "start": "./node_modules/.bin/electron .",
+    "test": "./node_modules/.bin/xo"
   },
   "author": "Jed Dark",
   "license": "MIT",
@@ -14,6 +16,21 @@
     "@babel/preset-react": "^7.0.0",
     "gulp": "^4.0.0",
     "gulp-babel": "^8.0.0",
-    "gulp-concat": "^2.6.1"
+    "gulp-concat": "^2.6.1",
+    "xo": "^0.24.0"
+  },
+  "dependencies": {
+    "electron": "^4.0.2",
+    "electron-prebuilt": "^1.4.13"
+  },
+  "xo": {
+    "space": 2,
+    "envs": [
+      "node",
+      "browser"
+    ],
+    "ignores": [
+      "dist/**"
+    ]
   }
 }
