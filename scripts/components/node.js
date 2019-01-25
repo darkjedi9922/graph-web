@@ -19,7 +19,8 @@ class Node extends React.Component {
 
         return (
             <g>
-                <circle r={radius} cx={centerX} cy={centerY} 
+                <circle r={radius} cx={centerX} cy={centerY}
+                    className={this.props.className}
                     onMouseDown={this.onMouseDown.bind(this)}
                     onMouseUp={this.onMouseUp.bind(this)}
                     onClick={this.props.onClick}
@@ -31,8 +32,7 @@ class Node extends React.Component {
                         width: radius * 2,
                         height: radius * 2
                     }} className="graph__node-text" style={{
-                        fill: "white",
-                        color: "white"
+                        
                     }}
                     onClick={this.props.onClick}
                     onMouseDown={this.onMouseDown.bind(this)}

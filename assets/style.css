@@ -345,6 +345,9 @@ template {
 html, body {
     height: 100%;
 }
+body {
+    background: white;
+}
 .graph {
     padding: 10px;
 }
@@ -356,13 +359,15 @@ html, body {
 .graph__node {
     width: 50px;
     height: 50px;
-    background: black;
+    fill: white;
     border-radius: 100%;
     text-align: center;
-    color: white;
     line-height: 50px;
     font-size: 20px;
     display: inline-block;
+    stroke-width: 2px;
+    stroke: black;
+    color: black;
 }
 .graph__node-text {
     -moz-user-select: none;

@@ -15,8 +15,11 @@ class Graph extends React.Component {
         const nodes = [];
         for (const id in this.state.nodes) {
             const node = this.state.nodes[id];
-            nodes.push(<Node key={id} id={id} text={node.text} radius={node.radius}
-                cx={node.x} cy={node.y} onMove={this.moveNode.bind(this, id)}
+            nodes.push(<Node key={id} id={id} text={node.text} 
+                radius={node.radius}
+                cx={node.x} cy={node.y}
+                className='graph__node' 
+                onMove={this.moveNode.bind(this, id)}
                 onClick={this.onNodeClick.bind(this, id)} />);
         }
 
@@ -132,7 +135,7 @@ class Graph extends React.Component {
             const newEdge = {
                 startNodeId: startNodeId,
                 endNodeId: endNodeId,
-                text: `Edge ${newEdgeId} text`,
+                text: `Edge ${newEdgeId}`,
                 curve: 0
             }
             
