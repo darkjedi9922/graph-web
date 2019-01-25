@@ -48,7 +48,6 @@ class EditableSvgText extends React.Component {
                 </text>
                 :
                 <foreignObject x={rect.x} y={rect.y}
-                    onMouseDown={this.props.onMouseDown}
                     width={rect.width} height={rect.height}>
                     <input defaultValue={text} ref={this.inputRef} 
                     className={this.props.className}
