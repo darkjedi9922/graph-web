@@ -353,7 +353,7 @@ body {
 }
 .graph__nodes {
     width: 100%;
-    height: 250px;
+    height: 600px;
     border: solid 1px black;
 }
 .graph__node {
