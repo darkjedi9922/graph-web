@@ -17,6 +17,8 @@ class Graph extends React.Component {
         this.nextNodeId = 1;
         this.nextEdgeId = 1;
         this.edgeAdding = null;
+        
+        this.canvasWrapperRef = React.createRef();
     }
 
     render() {
@@ -46,7 +48,7 @@ class Graph extends React.Component {
 
         return (
             <div className="graph">
-                <ContextMenuTrigger id="canvas-contextmenu" attributes={{
+                <ContextMenuTrigger id="canvas-contextmenu" ref={this.canvasWrapperRef} attributes={{
                     className: "graph__nodes-wrapper"
                 }}>
                     <svg className="graph__nodes">
@@ -54,24 +56,15 @@ class Graph extends React.Component {
                         {nodes}
                     </svg>
                 </ContextMenuTrigger>
-
                 <ContextMenu id="canvas-contextmenu" className="canvas-context">
-                    
-                    <ContextMenuItem attributes={{
+                    <ContextMenuItem onClick={this.handleAddNodeClick.bind(this)} attributes={{
                         className: 'canvas-context__button'
                     }}>Добавить узел</ContextMenuItem>
-                    
                     <ContextMenuItem disabled attributes={{
                         className: 'canvas-context__button'
                     }}>Добавить ребро</ContextMenuItem>
-                
                 </ContextMenu>
-
                 <div className="graph__buttons">
-                    <button className="graph__button graph__button--add-node"
-                        onClick={this.addNode.bind(this)}>
-                        Добавить узел
-                    </button>
                     <button onClick={this.onAddEdgeClick.bind(this)}>
                         Добавить ребро
                     </button>
@@ -82,6 +75,16 @@ class Graph extends React.Component {
                 </div>
             </div>
         );
+    }
+
+    handleAddNodeClick(e) {
+        let wrapperElem = this.canvasWrapperRef.current.elem;
+        this.addNode({
+            pos: {
+                x: e.clientX - wrapperElem.offsetLeft,
+                y: e.clientY - wrapperElem.offsetTop
+            }
+        });
     }
 
     onAddEdgeClick() {
@@ -136,15 +139,19 @@ class Graph extends React.Component {
         }).bind(this));
     }
 
-    addNode() {
+    /**
+     * options.pos.x
+     * options.pos.y
+     */
+    addNode(options) {
         this.setState((state, props) => ({
             nodes: (function () {
                 state.nodes[this.nextNodeId] = {
                     id: this.nextNodeId,
                     text: this.nextNodeId,
                     radius: 25,
-                    x: 25,
-                    y: 25,
+                    x: options.pos.x,
+                    y: options.pos.y,
                     startEdges: [],
                     endEdges: []
                 };
