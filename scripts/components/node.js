@@ -1,3 +1,6 @@
+const React = require('react');
+const EditableSvgText = require('./editable-svg-text');
+
 class Node extends React.Component {
     constructor(props) {
         super(props);
@@ -87,3 +90,5 @@ class Node extends React.Component {
         });
     }
 }
+
+module.exports = Node;

@@ -1,3 +1,6 @@
+const React = require('react');
+const gmath = require('../libs/gmath');
+
 class SvgArrow extends React.Component {
     /**
      * props.vector.start.x: number
@@ -18,7 +21,7 @@ class SvgArrow extends React.Component {
         const end = this.props.vector.end;
         const size = this.props.size;
 
-        const end90Rotated = rotatePoint(end, start, 90);
+        const end90Rotated = gmath.rotatePoint(end, start, 90);
         const normal = {
             x: end90Rotated.x - start.x,
             y: end90Rotated.y - start.y
@@ -36,3 +39,5 @@ class SvgArrow extends React.Component {
         );
     }
 }
+
+module.exports = SvgArrow;

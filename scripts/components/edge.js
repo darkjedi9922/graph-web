@@ -1,3 +1,9 @@
+const React = require('react');
+const SvgArrow = require('./svg-arrow');
+const EditableSvgText = require('./editable-svg-text');
+
+const gmath = require('../libs/gmath');
+
 class Edge extends React.Component {
     constructor(props) {
         super(props);
@@ -77,11 +83,11 @@ class Edge extends React.Component {
     }
 
     calcDegree() {
-        return calcVectorDegree(this.props.start, this.props.end);
+        return gmath.calcVectorDegree(this.props.start, this.props.end);
     }
 
     calcLength() {
-        return calcVectorLength(this.props.start, this.props.end);
+        return gmath.calcVectorLength(this.props.start, this.props.end);
     }
 
     onMouseDown(e) {
@@ -90,7 +96,7 @@ class Edge extends React.Component {
         const eventX = e.clientX - 10;
         const eventY = e.clientY - 10;
         const degree = this.calcDegree();
-        const planeStart = rotatePoint({x: eventX, y: eventY}, start, degree);
+        const planeStart = gmath.rotatePoint({x: eventX, y: eventY}, start, degree);
         this.curving = {
             startX: eventX,
             startY: eventY,
@@ -110,7 +116,7 @@ class Edge extends React.Component {
         // TODO: Вычислять координату с учетом размещения холста.
         var x = e.offsetX;
         var y = e.offsetY;
-        const planeEventPoint = rotatePoint({x: x, y: y}, start, degree);
+        const planeEventPoint = gmath.rotatePoint({x: x, y: y}, start, degree);
 
         const curve = planeEventPoint.y - this.curving.planeStart.y;
         this.props.onCurve(this.curving.startCurve + curve);
@@ -131,3 +137,5 @@ class Edge extends React.Component {
         this.props.onTextChange && this.props.onTextChange(text);
     }
 }
+
+module.exports = Edge;

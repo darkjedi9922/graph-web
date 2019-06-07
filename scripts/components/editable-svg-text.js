@@ -1,3 +1,5 @@
+const React = require('react');
+
 class EditableSvgText extends React.Component {
     /**
      * props: {
@@ -80,3 +82,5 @@ class EditableSvgText extends React.Component {
         if (e.keyCode === 13) this.stopEditing();
     }
 }
+
+module.exports = EditableSvgText;

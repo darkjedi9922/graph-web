@@ -1,3 +1,7 @@
+const React = require('react');
+const Node = require('./node');
+const Edge = require('./edge');
+
 class Graph extends React.Component {
     constructor(props) {
         super(props);
@@ -150,7 +154,4 @@ class Graph extends React.Component {
     }
 }
 
-ReactDOM.render(
-    <Graph />,
-    document.getElementById("graph-app")
-);
+module.exports = Graph;

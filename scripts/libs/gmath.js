@@ -54,3 +54,7 @@ function calcVectorDegree(start, end) {
     if (end.y > start.y) return 360 - result;
     return result;
 }
+
+exports.rotatePoint = rotatePoint;
+exports.calcVectorDegree = calcVectorDegree;
+exports.calcVectorLength = calcVectorLength;

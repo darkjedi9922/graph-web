@@ -1,5 +1,6 @@
 node_modules
-libs
+assets/*.map
+assets/asset.js
 assets/main.css
 assets/babel.js
 package-lock.json
