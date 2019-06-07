@@ -2,6 +2,10 @@ const React = require('react');
 const Node = require('./node');
 const Edge = require('./edge');
 
+const ContextMenu = require('react-contextmenu').ContextMenu;
+const ContextMenuTrigger = require('react-contextmenu').ContextMenuTrigger;
+const ContextMenuItem = require('react-contextmenu').MenuItem;
+
 class Graph extends React.Component {
     constructor(props) {
         super(props);
@@ -42,10 +46,27 @@ class Graph extends React.Component {
 
         return (
             <div className="graph">
-                <svg className="graph__nodes">
-                    {edges}
-                    {nodes}
-                </svg>
+                <ContextMenuTrigger id="canvas-contextmenu" attributes={{
+                    className: "graph__nodes-wrapper"
+                }}>
+                    <svg className="graph__nodes">
+                        {edges}
+                        {nodes}
+                    </svg>
+                </ContextMenuTrigger>
+
+                <ContextMenu id="canvas-contextmenu" className="canvas-context">
+                    
+                    <ContextMenuItem attributes={{
+                        className: 'canvas-context__button'
+                    }}>Добавить узел</ContextMenuItem>
+                    
+                    <ContextMenuItem disabled attributes={{
+                        className: 'canvas-context__button'
+                    }}>Добавить ребро</ContextMenuItem>
+                
+                </ContextMenu>
+
                 <div className="graph__buttons">
                     <button className="graph__button graph__button--add-node"
                         onClick={this.addNode.bind(this)}>
