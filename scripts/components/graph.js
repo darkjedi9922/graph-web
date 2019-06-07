@@ -42,17 +42,19 @@ class Graph extends React.Component {
                     {edges}
                     {nodes}
                 </svg>
-                <button className="graph__button graph__button--add-node"
-                    onClick={this.addNode.bind(this)}>
-                    Добавить узел
-                </button>
-                <button onClick={this.onAddEdgeClick.bind(this)}>
-                    Добавить ребро
-                </button>
-                <span> Граф: </span>
-                <button onClick={this.toggleArrowEdges.bind(this)}>
-                    {this.state.oriented ? "Ориентированный" : "Неориентированный"}
-                </button>
+                <div className="graph__buttons">
+                    <button className="graph__button graph__button--add-node"
+                        onClick={this.addNode.bind(this)}>
+                        Добавить узел
+                    </button>
+                    <button onClick={this.onAddEdgeClick.bind(this)}>
+                        Добавить ребро
+                    </button>
+                    <span> Граф: </span>
+                    <button onClick={this.toggleArrowEdges.bind(this)}>
+                        {this.state.oriented ? "Ориентированный" : "Неориентированный"}
+                    </button>
+                </div>
             </div>
         );
     }

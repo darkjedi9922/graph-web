@@ -342,20 +342,6 @@ template {
 
 /* ====== Graph ===== */
 
-html, body {
-    height: 100%;
-}
-body {
-    background: white;
-}
-.graph {
-    padding: 10px;
-}
-.graph__nodes {
-    width: 100%;
-    height: 600px;
-    border: solid 1px black;
-}
 .graph__node {
     width: 50px;
     height: 50px;

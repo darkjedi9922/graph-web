@@ -1,23 +1,32 @@
 var gulp = require('gulp');
-//ar sass = require('gulp-sass');
+var sass = require('gulp-sass');
 var babel = require('gulp-babel');
 var concat = require('gulp-concat');
-//var minifyCss = require('gulp-clean-css');
-//var autoprefixer = require('gulp-autoprefixer');
+var minifyCss = require('gulp-clean-css');
+var autoprefixer = require('gulp-autoprefixer');
 
-// const scssBlobs = [
-//     'styles/*.scss',
-//     'styles/*/*.scss',
-//     'styles/*/*/*.scss'
-// ]
+// ==== Styles ====
 
-// gulp.task('scss', function() {
-//     return gulp.src(scssBlobs)
-//         .pipe(sass())
-//         .pipe(minifyCss())
-//         .pipe(autoprefixer())
-//         .pipe(gulp.dest('assets/styles'));
-// });
+const scssBlobs = [
+    'styles/*.scss',
+    'styles/*/*.scss',
+    'styles/*/*/*.scss'
+]
+
+gulp.task('scss', function() {
+    return gulp.src(scssBlobs)
+        .pipe(sass())
+
+        // Именно minifyCss нормально обрабатывает @import в файлах, а не sass.
+        .pipe(minifyCss())
+
+        .pipe(autoprefixer())
+        .pipe(gulp.dest('assets'));
+});
+
+gulp.task('watch-scss', () => {
+    return gulp.watch(scssBlobs, gulp.task('scss'))
+})
 
 // ==== Babel ====
 
@@ -41,4 +50,5 @@ gulp.task('watch-babel', () => {
 
 // ==== Default ====
 
-gulp.task('default', gulp.parallel('watch-babel'));
+gulp.task('default', gulp.parallel('scss', 'babel'));
+gulp.task('watch', gulp.parallel('watch-scss', 'watch-babel'))
