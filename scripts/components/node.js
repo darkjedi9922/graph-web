@@ -2,6 +2,9 @@ const React = require('react');
 const EditableSvgText = require('./editable-svg-text');
 
 class Node extends React.Component {
+    /**
+     * props.onMove(x, y)
+     */
     constructor(props) {
         super(props);
         this.id = props.id;

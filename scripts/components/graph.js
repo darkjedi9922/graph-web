@@ -1,6 +1,5 @@
 const React = require('react');
-const Node = require('./node');
-const Edge = require('./edge');
+const Canvas = require('./canvas');
 
 const ContextMenu = require('react-contextmenu').ContextMenu;
 const ContextMenuTrigger = require('react-contextmenu').ContextMenuTrigger;
@@ -25,40 +24,15 @@ class Graph extends React.Component {
         this.lastContextedMenuNodeId = null;
         
         this.canvasWrapperRef = React.createRef();
+
+        this.onNodeClick = this.onNodeClick.bind(this);
+        this.moveNode = this.moveNode.bind(this);
+        this.onEdgeCurve = this.onEdgeCurve.bind(this);
+        this.onEdgeTextChange = this.onEdgeTextChange.bind(this);
     }
 
     render() {
-        const nodes = [];
-        for (const id in this.state.nodes) {
-            const node = this.state.nodes[id];
-            nodes.push(<Node key={id} id={id} text={node.text} 
-                radius={node.radius}
-                cx={node.x} cy={node.y}
-                className='graph__node' 
-                onMove={this.moveNode.bind(this, id)}
-                onClick={this.onNodeClick.bind(this, id)} />);
-        }
-
-        const edges = [];
-        for (const id in this.state.edges) {
-            const edge = this.state.edges[id];
-            const startNode = this.state.nodes[edge.startNodeId];
-            const start = { x: startNode.x, y: startNode.y };
-            
-            let end;
-            if (edge.endNodeId === null) {
-                end = { x: this.state.edgeAdding.x, y: this.state.edgeAdding.y };
-            } else {
-                const endNode = this.state.nodes[edge.endNodeId];
-                end = { x: endNode.x, y: endNode.y };
-            }
-
-            edges.push(<Edge key={id} start={start} end={end} 
-                arrow={this.state.oriented} curve={edge.curve} text={edge.text}
-                onCurve={this.onEdgeCurve.bind(this, id)}
-                onTextChange={this.onEdgeTextChange.bind(this, id)} />);
-        }
-
+        const edgeAdding = this.state.edgeAdding;
         const addEdgeEnabled = this.state.contextMenu.addEdge;
 
         return (
@@ -66,10 +40,14 @@ class Graph extends React.Component {
                 <ContextMenuTrigger id="canvas-contextmenu" ref={this.canvasWrapperRef} attributes={{
                     className: "graph__nodes-wrapper"
                 }}>
-                    <svg className="graph__nodes">
-                        {edges}
-                        {nodes}
-                    </svg>
+                    <Canvas nodes={this.state.nodes} edges={this.state.edges}
+                        oriented={this.state.oriented} onNodeClick={this.onNodeClick} 
+                        onNodeMove={this.moveNode} onEdgeCurve={this.onEdgeCurve} 
+                        onEdgeTextChange={this.onEdgeTextChange}
+                        addedEdgeEndPos={
+                            edgeAdding ? {x: edgeAdding.x, y: edgeAdding.y} : null
+                        }
+                    ></Canvas>
                 </ContextMenuTrigger>
                 <ContextMenu id="canvas-contextmenu" className="canvas-context" onShow={this.onContextMenuShow.bind(this)}>
                     <ContextMenuItem onClick={this.onAddNodeClick.bind(this)} attributes={{
