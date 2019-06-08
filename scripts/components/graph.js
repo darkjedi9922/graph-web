@@ -12,11 +12,17 @@ class Graph extends React.Component {
         this.state = {
             nodes: {},
             edges: {},
-            oriented: false
+            oriented: false,
+            contextMenu: {
+                addEdge: false
+            },
+            edgeAdding: null
         };
+        this.nodesCount = 0;
         this.nextNodeId = 1;
         this.nextEdgeId = 1;
-        this.edgeAdding = null;
+        this.lastAddedEdgeId = null;
+        this.lastContextedMenuNodeId = null;
         
         this.canvasWrapperRef = React.createRef();
     }
@@ -37,14 +43,23 @@ class Graph extends React.Component {
         for (const id in this.state.edges) {
             const edge = this.state.edges[id];
             const startNode = this.state.nodes[edge.startNodeId];
-            const endNode = this.state.nodes[edge.endNodeId];
-            const start = { x: startNode.x, y: startNode.y }
-            const end = { x: endNode.x, y: endNode.y }
+            const start = { x: startNode.x, y: startNode.y };
+            
+            let end;
+            if (edge.endNodeId === null) {
+                end = { x: this.state.edgeAdding.x, y: this.state.edgeAdding.y };
+            } else {
+                const endNode = this.state.nodes[edge.endNodeId];
+                end = { x: endNode.x, y: endNode.y };
+            }
+
             edges.push(<Edge key={id} start={start} end={end} 
                 arrow={this.state.oriented} curve={edge.curve} text={edge.text}
                 onCurve={this.onEdgeCurve.bind(this, id)}
                 onTextChange={this.onEdgeTextChange.bind(this, id)} />);
         }
+
+        const addEdgeEnabled = this.state.contextMenu.addEdge;
 
         return (
             <div className="graph">
@@ -56,18 +71,15 @@ class Graph extends React.Component {
                         {nodes}
                     </svg>
                 </ContextMenuTrigger>
-                <ContextMenu id="canvas-contextmenu" className="canvas-context">
-                    <ContextMenuItem onClick={this.handleAddNodeClick.bind(this)} attributes={{
+                <ContextMenu id="canvas-contextmenu" className="canvas-context" onShow={this.onContextMenuShow.bind(this)}>
+                    <ContextMenuItem onClick={this.onAddNodeClick.bind(this)} attributes={{
                         className: 'canvas-context__button'
                     }}>Добавить узел</ContextMenuItem>
-                    <ContextMenuItem disabled attributes={{
+                    <ContextMenuItem onClick={this.onAddEdgeClick.bind(this)} disabled={!addEdgeEnabled} attributes={{
                         className: 'canvas-context__button'
                     }}>Добавить ребро</ContextMenuItem>
                 </ContextMenu>
                 <div className="graph__buttons">
-                    <button onClick={this.onAddEdgeClick.bind(this)}>
-                        Добавить ребро
-                    </button>
                     <span> Граф: </span>
                     <button onClick={this.toggleArrowEdges.bind(this)}>
                         {this.state.oriented ? "Ориентированный" : "Неориентированный"}
@@ -77,7 +89,7 @@ class Graph extends React.Component {
         );
     }
 
-    handleAddNodeClick(e) {
+    onAddNodeClick(e) {
         let wrapperElem = this.canvasWrapperRef.current.elem;
         this.addNode({
             pos: {
@@ -88,29 +100,50 @@ class Graph extends React.Component {
     }
 
     onAddEdgeClick() {
-        // Включаем состояние добавление ребра, и при клике на первый узел, он будет
-        // записан как стартовый узел добавляемого ребра.
-        this.edgeAdding = {
-            startNodeId: null,
-        }
+        if (this.lastContextedMenuNodeId === null) return;
+        this.addEdge(this.lastContextedMenuNodeId, null);
+
+        const graph = this;
+        const wrapperElem = this.canvasWrapperRef.current.elem;
+        const mouseEventListener = (e) => {
+            
+            // Этот mouse event listener почему-то продолжает работать после
+            // удаления... Поэтому поставим сюда отдельный if.
+            if (!graph.state.edgeAdding) return;
+
+            graph.setState((state) => {
+                state.edgeAdding = {
+                    x: e.clientX - wrapperElem.offsetLeft,
+                    y: e.clientY - wrapperElem.offsetTop
+                };
+                return state;
+            });
+        };
+
+        this.setState(((state) => {
+            state.edgeAdding = {
+                x: state.nodes[this.lastContextedMenuNodeId].x,
+                y: state.nodes[this.lastContextedMenuNodeId].y,
+                mouseEventListener: mouseEventListener
+            };
+            return state;
+        }).bind(this));
+
+        document.body.addEventListener('mousemove', mouseEventListener);
     }
 
     onNodeClick(id) {
         // Клик на узле вне режима добавления ребра ничего не дает.
-        if (this.edgeAdding === null) return;
+        if (this.state.edgeAdding === null) return;
 
-        if (this.edgeAdding.startNodeId === null) {
-            // Это первый узел, на который нажимаем в режиме добавления ребра (старт 
-            // еще не определен).
-            this.edgeAdding.startNodeId = id;
-        } else {
-            // Это второй узел - конец ребра. Дополнительных данных о добавлении
-            // ребра сохранять не нужно - просто добавлем ребро.
-            this.addEdge(this.edgeAdding.startNodeId, id);
+        document.body.removeEventListener('mousemove', this.state.edgeAdding.mouseEventListener);
 
-            // Ребро добавлено - выключаем режим добавления ребра.
-            this.edgeAdding = null;
-        }
+        // Если мы в процессе добавления ребра, значит сам элемент уже был добавлен.
+        this.setState((function(state) {
+            state.edges[this.lastAddedEdgeId].endNodeId = id;
+            state.edgeAdding = null;
+            return state;
+        }).bind(this));
     }
 
     onEdgeCurve(id, curve) {
@@ -156,16 +189,21 @@ class Graph extends React.Component {
                     endEdges: []
                 };
                 this.nextNodeId += 1;
+                this.nodesCount += 1;
                 return state.nodes;
             }).bind(this)()
         }));
     }
 
+    /**
+     * endNodeId может быть null.
+     */
     addEdge(startNodeId, endNodeId) {
         if (startNodeId === endNodeId) return;
 
+        const newEdgeId = this.nextEdgeId++;
+
         this.setState((function(state, props) {
-            const newEdgeId = this.nextEdgeId++;
             const newEdge = {
                 startNodeId: startNodeId,
                 endNodeId: endNodeId,
@@ -175,10 +213,47 @@ class Graph extends React.Component {
             
             state.edges[newEdgeId] = newEdge;
             state.nodes[startNodeId].startEdges.push(newEdgeId);
-            state.nodes[endNodeId].endEdges.push(newEdgeId);
+            if (endNodeId !== null) state.nodes[endNodeId].endEdges.push(newEdgeId);
 
             return state;
         }).bind(this));
+
+        this.lastAddedEdgeId = newEdgeId;
+        return newEdgeId;
+    }
+
+    onContextMenuShow(e) {
+        const canvasPos = this._getCanvasPositionByContextMenuEvent(e);
+        const nodeId = this._findNodeByCanvasPosition(canvasPos);
+        addEdgeEnabled = nodeId !== null;
+
+        this.setState({
+            contextMenu: {
+                addEdge: addEdgeEnabled
+            }
+        });
+
+        this.lastContextedMenuNodeId = nodeId;
+    }
+
+    _getCanvasPositionByContextMenuEvent(event) {
+        let wrapperElem = this.canvasWrapperRef.current.elem;
+        return {
+            x: event.detail.position.x - wrapperElem.offsetLeft,
+            y: event.detail.position.y - wrapperElem.offsetTop
+        };
+    }
+
+    _findNodeByCanvasPosition({x, y}) {
+        for (const id in this.state.nodes) {
+            if (this.state.nodes.hasOwnProperty(id)) {
+                const node = this.state.nodes[id];
+                if (x >= node.x - node.radius && x <= node.x + node.radius &&
+                    y >= node.y - node.radius && y <= node.y + node.radius) 
+                    return id;
+            }
+        }
+        return null;
     }
 }
 
