@@ -53,6 +53,7 @@ class Canvas extends React.Component {
             result.push(<Edge key={id} arrow={this.props.oriented} 
                 start={this._getEdgeStartPos(id)} end={this._getEdgeEndPos(id)}
                 curve={edge.curve} text={edge.text}
+                nodeRadius={this._isAddedEdge(id) ? 0 : 25}
                 onCurve={(curve) => this.props.onEdgeCurve(id, curve)}
                 onTextChange={(text) => this.props.onEdgeTextChange(id, text)} />);
         }
@@ -71,8 +72,7 @@ class Canvas extends React.Component {
     _getEdgeEndPos(id) {
         let end;
         const edge = this.props.edges[id];
-        // Если у ребра нет конца, значит оно в процессе добавления.
-        if (edge.endNodeId === null) {
+        if (this._isAddedEdge(id)) {
             const addedEdgeEndPos = this.props.addedEdgeEndPos;
             end = { x: addedEdgeEndPos.x, y: addedEdgeEndPos.y };
         } else {
@@ -80,6 +80,11 @@ class Canvas extends React.Component {
             end = { x: endNode.x, y: endNode.y };
         }
         return end;
+    }
+
+    _isAddedEdge(id) {
+        // Если у ребра нет конца, значит оно в процессе добавления.
+        return this.props.edges[id].endNodeId === null;
     }
 }
 

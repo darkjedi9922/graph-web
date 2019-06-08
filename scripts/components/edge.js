@@ -5,6 +5,9 @@ const EditableSvgText = require('./editable-svg-text');
 const gmath = require('../libs/gmath');
 
 class Edge extends React.Component {
+    /**
+     * props.nodeRadius
+     */
     constructor(props) {
         super(props);
         this.state = { edit: false };
@@ -25,7 +28,7 @@ class Edge extends React.Component {
         const y1 = this.props.start.y;
         const curve = this.props.curve || 0;
         const arrowSize = 12.5;
-        const nodeRadius = 25;
+        const nodeRadius = this.props.nodeRadius;
         const planeLength = this.calcLength();
         const halfLength = planeLength / 2;
         const text = this.props.text;
