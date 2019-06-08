@@ -85,14 +85,11 @@ class Graph extends React.Component {
         const wrapperElem = this.canvasWrapperRef.current.elem;
         const mouseEventListener = (e) => {
             
-            // Этот mouse event listener почему-то продолжает работать после
-            // удаления... Поэтому поставим сюда отдельный if.
-            if (!graph.state.edgeAdding) return;
-
             graph.setState((state) => {
                 state.edgeAdding = {
                     x: e.clientX - wrapperElem.offsetLeft,
-                    y: e.clientY - wrapperElem.offsetTop
+                    y: e.clientY - wrapperElem.offsetTop,
+                    mouseEventListener: mouseEventListener
                 };
                 return state;
             });
