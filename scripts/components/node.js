@@ -25,12 +25,14 @@ class Node extends React.Component {
 
         return (
             <g>
-                <circle r={radius} cx={centerX} cy={centerY}
+                <circle r={radius} cx={centerX} cy={centerY} 
                     className={this.props.className}
                     onMouseDown={this.onMouseDown.bind(this)}
                     onMouseUp={this.onMouseUp.bind(this)}
                     onClick={this.props.onClick}
-                    onDoubleClick={this.onTextWillEdit} />
+                    onDoubleClick={this.onTextWillEdit}
+                    onContextMenu={this.props.onContextMenu}
+                />
                 <EditableSvgText text={this.state.text} edit={this.state.editing} 
                     rect={{
                         x: centerX - radius,
@@ -45,6 +47,7 @@ class Node extends React.Component {
                     onMouseUp={this.onMouseUp.bind(this)}
                     onWillEdit={this.onTextWillEdit}
                     onDidEdit={this.onTextChange} 
+                    onContextMenu={this.props.onContextMenu}
                 />
             </g>
         );

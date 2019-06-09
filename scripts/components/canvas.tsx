@@ -11,7 +11,7 @@ interface CanvasProps {
     onNodeMove: (id: number, x: number, y: number) => void,
     onEdgeCurve: (id: number, curve: number) => void,
     onEdgeTextChange: (id: number, text: string) => void,
-    onContextMenu: (event: React.MouseEvent<SVGSVGElement>) => void,
+    onContextMenu: (event: React.MouseEvent, nodeId: number, edgeId: number) => void,
     addedEdgeEndPos: Point
 }
 
@@ -28,7 +28,9 @@ class Canvas extends React.Component<CanvasProps>
 
         return (
             <svg className="graph__nodes" ref={this.elem}
-                onContextMenu={p.onContextMenu}
+                onContextMenu={(e) => {
+                    e.target === this.elem.current && p.onContextMenu(e, -1, -1)}
+                }
             >
                 {this._createEdgeElementList()}
                 {this._createNodeElementList()}
@@ -56,7 +58,9 @@ class Canvas extends React.Component<CanvasProps>
                 cx={node.x} cy={node.y}
                 className='graph__node'
                 onMove={(x, y) => this.props.onNodeMove(Number.parseInt(id), x, y)}
-                onClick={() => this.props.onNodeClick(Number.parseInt(id))} />);
+                onClick={() => this.props.onNodeClick(Number.parseInt(id))} 
+                onContextMenu={(e) => this.props.onContextMenu(e, Number.parseInt(id), -1)}
+            />);
         }
         return result;
     }

@@ -4,7 +4,6 @@ import { ContextMenu, MenuItem } from 'react-contextmenu';
 interface CanvasContextMenuProps {
     id: string,
     className: string,
-    onShow: () => void,
     onAddNodeClick: () => void,
     onAddEdgeClick: () => void,
     onRemoveNode: () => void
@@ -29,7 +28,7 @@ class CanvasContextMenu extends React.Component<CanvasContextMenuProps, CanvasCo
         const s = this.state;
 
         return (
-            <ContextMenu id={p.id} className={p.className} onShow={p.onShow}>
+            <ContextMenu id={p.id} className={p.className}>
                 <MenuItem onClick={p.onAddNodeClick} attributes={{
                     className: 'canvas-context__button'
                 }}>Добавить узел</MenuItem>

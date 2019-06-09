@@ -45,6 +45,7 @@ class EditableSvgText extends React.Component {
                     onMouseDown={this.props.onMouseDown}
                     onMouseUp={this.props.onMouseUp} 
                     onClick={this.props.onClick}
+                    onContextMenu={this.props.onContextMenu}
                 >
                     {text}
                 </text>
@@ -63,7 +64,8 @@ class EditableSvgText extends React.Component {
                     }, this.props.style)} 
                     onDoubleClick={this.startEditing} 
                     onBlur={this.stopEditing}
-                    onKeyDown={this.onKeyDown} />
+                    onKeyDown={this.onKeyDown} 
+                    onContextMenu={this.props.onContextMenu}/>
                 </foreignObject>
             }
         </>);

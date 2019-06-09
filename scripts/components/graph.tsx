@@ -21,8 +21,8 @@ export default class Graph extends React.Component<{}, GraphState>
     private nextNodeId: number = 1;
     private nextEdgeId: number = 1;
     private lastAddedEdgeId: number | null = null;
-    private lastContextedNodeId: number | null = null;
-    private lastContextedEdgeId: number | null = null;
+    private lastContextedNodeId: number = -1;
+    private lastContextedEdgeId: number = -1;
     private canvasRef = React.createRef<Canvas>();
     private canvasContextMenuRef = React.createRef<CanvasContextMenu>();
 
@@ -44,6 +44,7 @@ export default class Graph extends React.Component<{}, GraphState>
         this.moveNode = this.moveNode.bind(this);
         this.onEdgeCurve = this.onEdgeCurve.bind(this);
         this.onEdgeTextChange = this.onEdgeTextChange.bind(this);
+        this.onCanvasContextMenu = this.onCanvasContextMenu.bind(this);
         this.removeLastContextedNode = this.removeLastContextedNode.bind(this);
     }
 
@@ -61,7 +62,7 @@ export default class Graph extends React.Component<{}, GraphState>
                         onNodeMove={this.moveNode} 
                         onEdgeCurve={this.onEdgeCurve} 
                         onEdgeTextChange={this.onEdgeTextChange}
-                        onContextMenu={(e) => (this.contextMenuTrigger as any).handleContextClick(e)}
+                        onContextMenu={this.onCanvasContextMenu}
                         addedEdgeEndPos={
                             edgeAdding ? {x: edgeAdding.x, y: edgeAdding.y} : null
                         }
@@ -69,7 +70,6 @@ export default class Graph extends React.Component<{}, GraphState>
                 <CanvasContextMenu ref={this.canvasContextMenuRef}
                     id="canvas-contextmenu"
                     className="canvas-context" 
-                    onShow={this.onContextMenuShow.bind(this)}
                     onAddNodeClick={this.onAddNodeClick.bind(this)}
                     onAddEdgeClick={this.onAddEdgeClick.bind(this)}
                     onRemoveNode={this.removeLastContextedNode}
@@ -95,7 +95,7 @@ export default class Graph extends React.Component<{}, GraphState>
     }
 
     onAddEdgeClick() {
-        if (this.lastContextedNodeId === null) return;
+        if (this.lastContextedNodeId === -1) return;
         this.addEdge(this.lastContextedNodeId, null);
 
         const graph = this;
@@ -136,6 +136,7 @@ export default class Graph extends React.Component<{}, GraphState>
                 return newNodes;
             })()
         }));
+        this.nodesCount -= 1;
     }
 
     public removeEdge(id: number): void {
@@ -259,34 +260,11 @@ export default class Graph extends React.Component<{}, GraphState>
         return newEdgeId;
     }
 
-    onContextMenuShow(e: CustomEvent) {
-        const canvasPos = this.getCanvasPositionByContextMenuEvent(e);
-        const nodeId = this.findNodeByCanvasPosition(canvasPos);
-        const isNodeSelected = nodeId !== null;
-
-        this.canvasContextMenuRef.current.enableAddEdge(isNodeSelected)
-        this.canvasContextMenuRef.current.enableRemoveNode(isNodeSelected);
-
+    onCanvasContextMenu(e, nodeId: number, edgeId: number): void {
+        (this.contextMenuTrigger as any).handleContextClick(e);
+        const contextMenu = this.canvasContextMenuRef.current
+        contextMenu.enableAddEdge(this.nodesCount > 1 && nodeId !== -1)
+        contextMenu.enableRemoveNode(nodeId !== -1);
         this.lastContextedNodeId = nodeId;
-    }
-
-    private getCanvasPositionByContextMenuEvent(event) {
-        let canvasPos = this.canvasRef.current.getCoords();
-        return {
-            x: event.detail.position.x - canvasPos.x,
-            y: event.detail.position.y - canvasPos.y
-        };
-    }
-
-    private findNodeByCanvasPosition({x, y}): number | null {
-        for (const id in this.state.nodes) {
-            if (this.state.nodes.hasOwnProperty(id)) {
-                const node = this.state.nodes[id];
-                if (x >= node.x - node.radius && x <= node.x + node.radius &&
-                    y >= node.y - node.radius && y <= node.y + node.radius) 
-                    return Number.parseInt(id);
-            }
-        }
-        return null;
     }
 }
