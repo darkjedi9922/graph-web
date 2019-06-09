@@ -7,19 +7,26 @@ interface NodeModel {
     id: number,
     x: number,
     y: number,
-    text: string,
+    text: string | number,
     radius: number,
     startEdges: number[],
     endEdges: number[]
 }
 
+interface EdgeModel {
+    startNodeId: number,
+    endNodeId: number,
+    text: string | number,
+    curve: number
+}
+
+interface NodeMap { [id: number]: NodeModel };
+interface EdgeMap { [id: number]: EdgeModel };
+
 interface GraphState {
-    nodes: {[id: number]: NodeModel},
-    edges: object,
+    nodes: NodeMap,
+    edges: EdgeMap,
     oriented: boolean,
-    contextMenu: {
-        addEdge: boolean
-    },
     edgeAdding: null | {
         x: number,
         y: number,
@@ -32,9 +39,10 @@ export default class Graph extends React.Component<{}, GraphState>
     private nodesCount: number = 0;
     private nextNodeId: number = 1;
     private nextEdgeId: number = 1;
-    private lastAddedEdgeId: number = null;
-    private lastContextedMenuNodeId: number = null;
+    private lastAddedEdgeId: number | null = null;
+    private lastContextedNodeId: number | null = null;
     private canvasWrapperRef = React.createRef() as any;
+    private canvasContextMenuRef = React.createRef<CanvasContextMenu>();
 
     constructor(props) {
         super(props);
@@ -42,9 +50,6 @@ export default class Graph extends React.Component<{}, GraphState>
             nodes: {},
             edges: {},
             oriented: false,
-            contextMenu: {
-                addEdge: false
-            },
             edgeAdding: null
         };
 
@@ -52,12 +57,12 @@ export default class Graph extends React.Component<{}, GraphState>
         this.moveNode = this.moveNode.bind(this);
         this.onEdgeCurve = this.onEdgeCurve.bind(this);
         this.onEdgeTextChange = this.onEdgeTextChange.bind(this);
+        this.removeLastContextedNode = this.removeLastContextedNode.bind(this);
     }
 
     render() {
         const state = this.state;
         const edgeAdding = state.edgeAdding;
-        const addEdgeEnabled = state.contextMenu.addEdge;
 
         return (
             <div className="graph">
@@ -73,12 +78,13 @@ export default class Graph extends React.Component<{}, GraphState>
                         }
                     ></Canvas>
                 </ContextMenuTrigger>
-                <CanvasContextMenu id="canvas-contextmenu"
+                <CanvasContextMenu ref={this.canvasContextMenuRef}
+                    id="canvas-contextmenu"
                     className="canvas-context" 
-                    addEdgeEnabled={addEdgeEnabled}
                     onShow={this.onContextMenuShow.bind(this)}
                     onAddNodeClick={this.onAddNodeClick.bind(this)}
                     onAddEdgeClick={this.onAddEdgeClick.bind(this)}
+                    onRemoveNode={this.removeLastContextedNode}
                 ></CanvasContextMenu>
                 <div className="graph__buttons">
                     <span> Граф: </span>
@@ -101,8 +107,8 @@ export default class Graph extends React.Component<{}, GraphState>
     }
 
     onAddEdgeClick() {
-        if (this.lastContextedMenuNodeId === null) return;
-        this.addEdge(this.lastContextedMenuNodeId, null);
+        if (this.lastContextedNodeId === null) return;
+        this.addEdge(this.lastContextedNodeId, null);
 
         const graph = this;
         const wrapperElem = this.canvasWrapperRef.current.elem;
@@ -121,14 +127,57 @@ export default class Graph extends React.Component<{}, GraphState>
 
         this.setState(((state: GraphState) => {
             state.edgeAdding = {
-                x: state.nodes[this.lastContextedMenuNodeId].x,
-                y: state.nodes[this.lastContextedMenuNodeId].y,
+                x: state.nodes[this.lastContextedNodeId].x,
+                y: state.nodes[this.lastContextedNodeId].y,
                 mouseEventListener: mouseEventListener
             };
             return state;
         }).bind(this));
 
         document.body.addEventListener('mousemove', mouseEventListener);
+    }
+
+    private removeLastContextedNode(): void {
+        const nodeId = this.lastContextedNodeId;
+        if (nodeId === null) return;
+        this.removeNodeEdges(nodeId);
+        this.setState((state) => ({
+            nodes: (() => {
+                let newNodes = {...state.nodes};
+                delete newNodes[nodeId];
+                return newNodes;
+            })()
+        }));
+    }
+
+    public removeEdge(id: number): void {
+        this.setState((state) => ({
+            edges: (() => {
+                let newEdges = {...state.edges};
+                delete newEdges[id];
+                return newEdges;
+            })(),
+            nodes: (() => {
+                let newNodes: NodeMap = {...state.nodes};
+                let startNode: NodeModel = newNodes[state.edges[id].startNodeId];
+                let endNode: NodeModel = newNodes[state.edges[id].endNodeId];
+
+                // Удаляем это ребро из его начального и конечного узла.
+                const filter = edgeId => edgeId !== id;
+                startNode.startEdges = startNode.startEdges.filter(filter);
+                endNode.endEdges = endNode.endEdges.filter(filter);
+
+                return newNodes;
+            })()
+        }))
+    }
+
+    public removeNodeEdges(nodeId: number): void {
+        const remover = (edgeId) => {
+            this.removeEdge(edgeId);
+        };
+        this.state.nodes[nodeId].startEdges.map(remover);
+        this.state.nodes[nodeId].endEdges.map(remover);
     }
 
     onNodeClick(id) {
@@ -138,7 +187,8 @@ export default class Graph extends React.Component<{}, GraphState>
         document.body.removeEventListener('mousemove', this.state.edgeAdding.mouseEventListener);
 
         // Если мы в процессе добавления ребра, значит сам элемент уже был добавлен.
-        this.setState((function(state) {
+        this.setState((function(this: Graph, state: GraphState) {
+            state.nodes[id].endEdges.push(this.lastAddedEdgeId);
             state.edges[this.lastAddedEdgeId].endNodeId = id;
             state.edgeAdding = null;
             return state;
@@ -177,7 +227,7 @@ export default class Graph extends React.Component<{}, GraphState>
      */
     addNode(options) {
         this.setState((state, props) => ({
-            nodes: (function () {
+            nodes: (function (this: Graph) {
                 state.nodes[this.nextNodeId] = {
                     id: this.nextNodeId,
                     text: this.nextNodeId,
@@ -222,20 +272,17 @@ export default class Graph extends React.Component<{}, GraphState>
     }
 
     onContextMenuShow(e) {
-        const canvasPos = this._getCanvasPositionByContextMenuEvent(e);
-        const nodeId = this._findNodeByCanvasPosition(canvasPos);
-        const addEdgeEnabled = nodeId !== null;
+        const canvasPos = this.getCanvasPositionByContextMenuEvent(e);
+        const nodeId = this.findNodeByCanvasPosition(canvasPos);
+        const isNodeSelected = nodeId !== null;
 
-        this.setState({
-            contextMenu: {
-                addEdge: addEdgeEnabled
-            }
-        });
+        this.canvasContextMenuRef.current.enableAddEdge(isNodeSelected)
+        this.canvasContextMenuRef.current.enableRemoveNode(isNodeSelected);
 
-        this.lastContextedMenuNodeId = nodeId;
+        this.lastContextedNodeId = nodeId;
     }
 
-    _getCanvasPositionByContextMenuEvent(event) {
+    private getCanvasPositionByContextMenuEvent(event) {
         let wrapperElem = this.canvasWrapperRef.current.elem;
         return {
             x: event.detail.position.x - wrapperElem.offsetLeft,
@@ -243,7 +290,7 @@ export default class Graph extends React.Component<{}, GraphState>
         };
     }
 
-    _findNodeByCanvasPosition({x, y}): number | null {
+    private findNodeByCanvasPosition({x, y}): number | null {
         for (const id in this.state.nodes) {
             if (this.state.nodes.hasOwnProperty(id)) {
                 const node = this.state.nodes[id];
