@@ -1,29 +1,47 @@
-const React = require('react');
-const Node = require('./node');
-const Edge = require('./edge');
+import React from 'react';
+import Node from './node';
+import Edge from './edge';
+import { NodeMap, EdgeMap, Point } from '../types';
 
-class Canvas extends React.Component {
-    /**
-     * props.nodes: array
-     * props.edges: array
-     * props.oriented: bool
-     * props.onNodeClick(id)
-     * props.onNodeMove(id, x, y)
-     * props.onEdgeCurve(id, curve)
-     * props.onEdgeTextChange(id, text)
-     * props.addedEdgeEndPos: {x, y} | null
-     */
+interface CanvasProps {
+    nodes: NodeMap,
+    edges: EdgeMap,
+    oriented: boolean,
+    onNodeClick: (id: number) => void,
+    onNodeMove: (id: number, x: number, y: number) => void,
+    onEdgeCurve: (id: number, curve: number) => void,
+    onEdgeTextChange: (id: number, text: string) => void,
+    onContextMenu: (event: React.MouseEvent<SVGSVGElement>) => void,
+    addedEdgeEndPos: Point
+}
+
+class Canvas extends React.Component<CanvasProps> 
+{
+    private elem = React.createRef<SVGSVGElement>()
+
     constructor(props) {
         super(props);
     }
 
     render() {
+        const p = this.props;
+
         return (
-            <svg className="graph__nodes">
+            <svg className="graph__nodes" ref={this.elem}
+                onContextMenu={p.onContextMenu}
+            >
                 {this._createEdgeElementList()}
                 {this._createNodeElementList()}
             </svg>
         );
+    }
+
+    public getCoords(): Point {
+        const rect = this.elem.current.getBoundingClientRect();
+        return {
+            x: rect.left + pageXOffset,
+            y: rect.top + pageYOffset
+        }
     }
 
     /**
@@ -37,8 +55,8 @@ class Canvas extends React.Component {
                 radius={node.radius}
                 cx={node.x} cy={node.y}
                 className='graph__node'
-                onMove={(x, y) => this.props.onNodeMove(id, x, y)}
-                onClick={() => this.props.onNodeClick(id)} />);
+                onMove={(x, y) => this.props.onNodeMove(Number.parseInt(id), x, y)}
+                onClick={() => this.props.onNodeClick(Number.parseInt(id))} />);
         }
         return result;
     }
@@ -48,14 +66,14 @@ class Canvas extends React.Component {
      */
     _createEdgeElementList() {
         const result = [];
-        for (const id in this.props.edges) {
+        for (let id in this.props.edges) {
             const edge = this.props.edges[id];
             result.push(<Edge key={id} arrow={this.props.oriented}
                 start={this._getEdgeStartPos(id)} end={this._getEdgeEndPos(id)}
                 curve={edge.curve} text={edge.text}
                 nodeRadius={this._isAddedEdge(id) ? 0 : 25}
-                onCurve={(curve) => this.props.onEdgeCurve(id, curve)}
-                onTextChange={(text) => this.props.onEdgeTextChange(id, text)} />);
+                onCurve={(curve) => this.props.onEdgeCurve(Number.parseInt(id), curve)}
+                onTextChange={(text) => this.props.onEdgeTextChange(Number.parseInt(id), text)} />);
         }
         return result;
     }
@@ -88,4 +106,4 @@ class Canvas extends React.Component {
     }
 }
 
-module.exports = Canvas;
+export default Canvas;

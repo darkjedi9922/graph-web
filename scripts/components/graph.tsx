@@ -2,26 +2,7 @@ import React from 'react';
 import Canvas from './canvas';
 import CanvasContextMenu from './canvas-context-menu';
 import { ContextMenuTrigger } from 'react-contextmenu';
-
-interface NodeModel {
-    id: number,
-    x: number,
-    y: number,
-    text: string | number,
-    radius: number,
-    startEdges: number[],
-    endEdges: number[]
-}
-
-interface EdgeModel {
-    startNodeId: number,
-    endNodeId: number,
-    text: string | number,
-    curve: number
-}
-
-interface NodeMap { [id: number]: NodeModel };
-interface EdgeMap { [id: number]: EdgeModel };
+import { NodeMap, EdgeMap, NodeModel } from '../types';
 
 interface GraphState {
     nodes: NodeMap,
@@ -41,8 +22,14 @@ export default class Graph extends React.Component<{}, GraphState>
     private nextEdgeId: number = 1;
     private lastAddedEdgeId: number | null = null;
     private lastContextedNodeId: number | null = null;
-    private canvasWrapperRef = React.createRef() as any;
+    private lastContextedEdgeId: number | null = null;
+    private canvasRef = React.createRef<Canvas>();
     private canvasContextMenuRef = React.createRef<CanvasContextMenu>();
+
+    // Элемент триггера для открытия контекстного меню вручную через него.
+    private contextMenuTrigger = new ContextMenuTrigger({
+        id: 'canvas-contextmenu'
+    });
 
     constructor(props) {
         super(props);
@@ -66,18 +53,19 @@ export default class Graph extends React.Component<{}, GraphState>
 
         return (
             <div className="graph">
-                <ContextMenuTrigger id="canvas-contextmenu" ref={this.canvasWrapperRef} attributes={{
-                    className: "graph__nodes-wrapper"
-                }}>
-                    <Canvas nodes={state.nodes} edges={state.edges}
-                        oriented={state.oriented} onNodeClick={this.onNodeClick} 
-                        onNodeMove={this.moveNode} onEdgeCurve={this.onEdgeCurve} 
+                    <Canvas ref={this.canvasRef}
+                        nodes={state.nodes} 
+                        edges={state.edges}
+                        oriented={state.oriented} 
+                        onNodeClick={this.onNodeClick} 
+                        onNodeMove={this.moveNode} 
+                        onEdgeCurve={this.onEdgeCurve} 
                         onEdgeTextChange={this.onEdgeTextChange}
+                        onContextMenu={(e) => (this.contextMenuTrigger as any).handleContextClick(e)}
                         addedEdgeEndPos={
                             edgeAdding ? {x: edgeAdding.x, y: edgeAdding.y} : null
                         }
                     ></Canvas>
-                </ContextMenuTrigger>
                 <CanvasContextMenu ref={this.canvasContextMenuRef}
                     id="canvas-contextmenu"
                     className="canvas-context" 
@@ -97,11 +85,11 @@ export default class Graph extends React.Component<{}, GraphState>
     }
 
     onAddNodeClick(e) {
-        let wrapperElem = this.canvasWrapperRef.current.elem as HTMLElement;
+        const canvasPos = this.canvasRef.current.getCoords();
         this.addNode({
             pos: {
-                x: e.clientX - wrapperElem.offsetLeft,
-                y: e.clientY - wrapperElem.offsetTop
+                x: e.clientX - canvasPos.x,
+                y: e.clientY - canvasPos.y
             }
         });
     }
@@ -111,14 +99,14 @@ export default class Graph extends React.Component<{}, GraphState>
         this.addEdge(this.lastContextedNodeId, null);
 
         const graph = this;
-        const wrapperElem = this.canvasWrapperRef.current.elem;
+        const canvasPos = this.canvasRef.current.getCoords();
         const mouseEventListener = (e) => {
             
             graph.setState((state) => {
                 return Object.assign({}, state, {
                     edgeAdding: {
-                        x: e.clientX - wrapperElem.offsetLeft,
-                        y: e.clientY - wrapperElem.offsetTop,
+                        x: e.clientX - canvasPos.x,
+                        y: e.clientY - canvasPos.y,
                         mouseEventListener: mouseEventListener
                     }
                 })
@@ -230,7 +218,7 @@ export default class Graph extends React.Component<{}, GraphState>
             nodes: (function (this: Graph) {
                 state.nodes[this.nextNodeId] = {
                     id: this.nextNodeId,
-                    text: this.nextNodeId,
+                    text: this.nextNodeId.toString(),
                     radius: 25,
                     x: options.pos.x,
                     y: options.pos.y,
@@ -271,7 +259,7 @@ export default class Graph extends React.Component<{}, GraphState>
         return newEdgeId;
     }
 
-    onContextMenuShow(e) {
+    onContextMenuShow(e: CustomEvent) {
         const canvasPos = this.getCanvasPositionByContextMenuEvent(e);
         const nodeId = this.findNodeByCanvasPosition(canvasPos);
         const isNodeSelected = nodeId !== null;
@@ -283,10 +271,10 @@ export default class Graph extends React.Component<{}, GraphState>
     }
 
     private getCanvasPositionByContextMenuEvent(event) {
-        let wrapperElem = this.canvasWrapperRef.current.elem;
+        let canvasPos = this.canvasRef.current.getCoords();
         return {
-            x: event.detail.position.x - wrapperElem.offsetLeft,
-            y: event.detail.position.y - wrapperElem.offsetTop
+            x: event.detail.position.x - canvasPos.x,
+            y: event.detail.position.y - canvasPos.y
         };
     }
 
@@ -296,7 +284,7 @@ export default class Graph extends React.Component<{}, GraphState>
                 const node = this.state.nodes[id];
                 if (x >= node.x - node.radius && x <= node.x + node.radius &&
                     y >= node.y - node.radius && y <= node.y + node.radius) 
-                    return id as unknown as number;
+                    return Number.parseInt(id);
             }
         }
         return null;

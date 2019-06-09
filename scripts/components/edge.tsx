@@ -1,13 +1,34 @@
-const React = require('react');
-const SvgArrow = require('./svg-arrow');
-const EditableSvgText = require('./editable-svg-text');
+import React from 'react';
+import SvgArrow from './svg-arrow';
+import EditableSvgText from './editable-svg-text';
 
-const gmath = require('../libs/gmath');
+import gmath from '../libs/gmath';
+import { Point } from '../types';
 
-class Edge extends React.Component {
-    /**
-     * props.nodeRadius
-     */
+interface EdgeProps {
+    start: Point,
+    end: Point,
+    curve: number,
+    nodeRadius: number,
+    text: string,
+    arrow: boolean,
+    onCurve: (curve) => void
+    onTextChange: (text) => void
+}
+
+interface EdgeState {
+    edit: boolean
+}
+
+class Edge extends React.Component<EdgeProps, EdgeState>
+{
+    private curving: {
+        startX: number,
+        startY: number,
+        planeStart: Point,
+        startCurve: number
+    } | null = null;
+
     constructor(props) {
         super(props);
         this.state = { edit: false };
@@ -141,4 +162,4 @@ class Edge extends React.Component {
     }
 }
 
-module.exports = Edge;
+export default Edge;

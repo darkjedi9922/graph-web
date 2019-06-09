@@ -17,10 +17,6 @@ body {
     flex-direction: column;
     padding: 10px 15px;
     box-sizing: border-box;
-
-    &__nodes-wrapper {
-        flex-grow: 1;
-    }
     
     &__nodes {
         background: white;
