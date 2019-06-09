@@ -50,7 +50,7 @@ class Canvas extends React.Component {
         const result = [];
         for (const id in this.props.edges) {
             const edge = this.props.edges[id];
-            result.push(<Edge key={id} arrow={this.props.oriented} 
+            result.push(<Edge key={id} arrow={this.props.oriented}
                 start={this._getEdgeStartPos(id)} end={this._getEdgeEndPos(id)}
                 curve={edge.curve} text={edge.text}
                 nodeRadius={this._isAddedEdge(id) ? 0 : 25}

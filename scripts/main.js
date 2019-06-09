@@ -1,6 +1,7 @@
 const React = require("react");
 const ReactDOM = require("react-dom");
-const Graph = require('./components/graph');
+
+import Graph from './components/graph';
 
 ReactDOM.render(
     <Graph />,
