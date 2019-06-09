@@ -57,6 +57,10 @@ module.exports = {
                 use: ['url-loader']
             },
             {
+                test: /\.(ts|tsx)$/,
+                use: ['babel-loader', 'ts-loader']
+            },
+            {
                 test: /\.(js|jsx)$/,
                 use: ['babel-loader']
             }
@@ -66,6 +70,6 @@ module.exports = {
         new ExtractTextPlugin('[name]')
     ],
     resolve: {
-        extensions: ['*', '.js', '.jsx']
+        extensions: ['*', '.ts', '.tsx', '.js', '.jsx']
     }
 }

@@ -1,0 +1,23 @@
+{
+    "compilerOptions": {
+        "allowSyntheticDefaultImports": true,
+        "jsx": "react",
+        "lib": [
+            "es2015",
+            "es2017",
+            "dom"
+        ],
+        "baseUrl": ".",
+        "paths": {
+            "*": ["*", "node_modules/react-contextmenu/dist/*"]
+        },
+        "module": "es6",
+        "target": "es6"
+    },
+    "include": [
+        "./scripts/*.ts",
+        "./scripts/*.tsx",
+        "./scripts/**/*.ts",
+        "./scripts/**/*.tsx"
+    ]
+}
