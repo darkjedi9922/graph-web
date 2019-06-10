@@ -13,7 +13,8 @@ interface EdgeProps {
     text: string,
     arrow: boolean,
     onCurve: (curve) => void
-    onTextChange: (text) => void
+    onTextChange: (text) => void,
+    onContextMenu: (e: React.MouseEvent) => void
 }
 
 interface EdgeState {
@@ -75,6 +76,7 @@ class Edge extends React.Component<EdgeProps, EdgeState>
                 size={arrowSize}
                 onDoubleClick={this.onTextWillEdit}
                 onMouseDown={this.onMouseDown}
+                onContextMenu={this.props.onContextMenu}
             />
         }
 
@@ -89,8 +91,9 @@ class Edge extends React.Component<EdgeProps, EdgeState>
         return (
             <g transform={"rotate(" + -degree + " " + x1 + " " + y1 + ")"} >
                 <path fill="none" d={d} stroke="black" strokeWidth="2"
-                    onMouseDown={this.onMouseDown} 
+                    onMouseDown={this.onMouseDown}
                     onDoubleClick={this.onTextWillEdit}
+                    onContextMenu={this.props.onContextMenu}
                 ></path>
                 {arrowElement}
                 <EditableSvgText text={text} rect={textRect} edit={this.state.edit}
@@ -100,8 +103,10 @@ class Edge extends React.Component<EdgeProps, EdgeState>
                         ${textRect.y + textRect.height / 2}
                     )`}
                     onMouseDown={this.onMouseDown}
-                    onWillEdit={this.onTextWillEdit} 
-                    onDidEdit={this.onTextDidEdit} />
+                    onWillEdit={this.onTextWillEdit}
+                    onDidEdit={this.onTextDidEdit}
+                    onContextMenu={this.props.onContextMenu}
+                />
             </g>
         );
     }

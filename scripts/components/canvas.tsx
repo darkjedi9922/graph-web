@@ -53,7 +53,7 @@ class Canvas extends React.Component<CanvasProps>
         let result = [];
         for (const id in this.props.nodes) {
             const node = this.props.nodes[id];
-            result.push(<Node key={id} id={id} text={node.text}
+            result.push(<Node key={id} id={Number.parseInt(id)} text={node.text}
                 radius={node.radius}
                 cx={node.x} cy={node.y}
                 className='graph__node'
@@ -77,7 +77,9 @@ class Canvas extends React.Component<CanvasProps>
                 curve={edge.curve} text={edge.text}
                 nodeRadius={this._isAddedEdge(id) ? 0 : 25}
                 onCurve={(curve) => this.props.onEdgeCurve(Number.parseInt(id), curve)}
-                onTextChange={(text) => this.props.onEdgeTextChange(Number.parseInt(id), text)} />);
+                onTextChange={(text) => this.props.onEdgeTextChange(Number.parseInt(id), text)}
+                onContextMenu={(e) => this.props.onContextMenu(e, -1, Number.parseInt(id))}    
+            />);
         }
         return result;
     }

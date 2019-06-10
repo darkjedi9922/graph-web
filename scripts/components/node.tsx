@@ -1,14 +1,34 @@
-const React = require('react');
-const EditableSvgText = require('./editable-svg-text');
+import React from 'react';
+import EditableSvgText from './editable-svg-text';
 
-class Node extends React.Component {
-    /**
-     * props.onMove(x, y)
-     */
+interface NodeProps {
+    id: number,
+    radius: number,
+    cx: number,
+    cy: number,
+    text: string,
+    className: string,
+    onClick: (e: React.MouseEvent) => void,
+    onMove: (x: number, y: number) => void,
+    onContextMenu: (e: React.MouseEvent) => void
+}
+
+interface NodeState {
+    text: string,
+    editing: boolean
+}
+
+class Node extends React.Component<NodeProps, NodeState> {
+    private moving: {
+        startX: number,
+        startY: number,
+        cursorStartX: number,
+        cursorStartY: number,
+        listener: (e: MouseEvent) => void
+    } | null = null;
+    
     constructor(props) {
         super(props);
-        this.id = props.id;
-        this.moving = null;
         this.state = {
             text: props.text,
             editing: false
@@ -97,4 +117,4 @@ class Node extends React.Component {
     }
 }
 
-module.exports = Node;
+export default Node;

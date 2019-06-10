@@ -73,6 +73,7 @@ export default class Graph extends React.Component<{}, GraphState>
                     onAddNodeClick={this.onAddNodeClick.bind(this)}
                     onAddEdgeClick={this.onAddEdgeClick.bind(this)}
                     onRemoveNode={this.removeLastContextedNode}
+                    onRemoveEdge={() => this.removeEdge(this.lastContextedEdgeId)}
                 ></CanvasContextMenu>
                 <div className="graph__buttons">
                     <span> Граф: </span>
@@ -265,6 +266,8 @@ export default class Graph extends React.Component<{}, GraphState>
         const contextMenu = this.canvasContextMenuRef.current
         contextMenu.enableAddEdge(this.nodesCount > 1 && nodeId !== -1)
         contextMenu.enableRemoveNode(nodeId !== -1);
+        contextMenu.enableRemoveEdge(edgeId !== -1);
         this.lastContextedNodeId = nodeId;
+        this.lastContextedEdgeId = edgeId;
     }
 }

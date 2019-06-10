@@ -1,17 +1,19 @@
-const React = require('react');
-const gmath = require('../libs/gmath');
+import React from 'react';
+import gmath from '../libs/gmath';
+import { Point } from 'scripts/types';
 
-class SvgArrow extends React.Component {
-    /**
-     * props.vector.start.x: number
-     * props.vector.start.y: number
-     * props.vector.end.x: number
-     * props.vector.end.y: number
-     * props.size: number
-     * 
-     * props.onDoubleClick: (e) => {}
-     * props.onMouseDown: (e) => {}
-     */
+interface SvgArrowProps {
+    vector: {
+        start: Point,
+        end: Point
+    },
+    size: number,
+    onDoubleClick: (e: React.MouseEvent) => void,
+    onMouseDown: (e: React.MouseEvent) => void,
+    onContextMenu: (e: React.MouseEvent) => void
+}
+
+class SvgArrow extends React.Component<SvgArrowProps> {
     constructor(props) {
         super(props);
     }
@@ -35,9 +37,10 @@ class SvgArrow extends React.Component {
                 ${(start.y + size * -normal.y / (size * 2))}`}
                 onDoubleClick={this.props.onDoubleClick}
                 onMouseDown={this.props.onMouseDown}
+                onContextMenu={this.props.onContextMenu}
             ></polygon>
         );
     }
 }
 
-module.exports = SvgArrow;
+export default SvgArrow;

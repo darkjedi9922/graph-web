@@ -1,25 +1,30 @@
-const React = require('react');
+import React from 'react';
 
-class EditableSvgText extends React.Component {
-    /**
-     * props: {
-     *  rect is {x, y, width, height},
-     *  text is the text,
-     *  edit is bool mode,
-     *  style is styles to text (both svg and html styles in one object),
-     *  className,
-     *  transform svg transform,
-     *  onWillEdit callback,
-     *  onDidEdit (text) => {} callback,
-     *  onClick callback,
-     *  onMouseDown callback,
-     *  onMouseUp callback
-     * }
-     */
+interface EditableSvgTextProps {
+    rect: {
+        x: number,
+        y: number,
+        width: number,
+        height: number
+    },
+    text: string,
+    edit: boolean,
+    style?: object,
+    className?: string,
+    transform?: string,
+    onMouseDown: (e: React.MouseEvent) => void,
+    onMouseUp?: (e: React.MouseEvent) => void,
+    onClick?: (e: React.MouseEvent) => void,
+    onContextMenu?: (e: React.MouseEvent) => void,
+    onWillEdit?: () => void,
+    onDidEdit?: (text: string) => void
+}
+
+class EditableSvgText extends React.Component<EditableSvgTextProps> {
+    private inputRef = React.createRef<HTMLInputElement>();
+    
     constructor(props) {
         super(props);
-
-        this.inputRef = React.createRef();
 
         this.startEditing = this.startEditing.bind(this);
         this.stopEditing = this.stopEditing.bind(this);
@@ -85,4 +90,4 @@ class EditableSvgText extends React.Component {
     }
 }
 
-module.exports = EditableSvgText;
+export default EditableSvgText;

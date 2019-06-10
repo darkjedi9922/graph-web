@@ -6,12 +6,14 @@ interface CanvasContextMenuProps {
     className: string,
     onAddNodeClick: () => void,
     onAddEdgeClick: () => void,
-    onRemoveNode: () => void
+    onRemoveNode: () => void,
+    onRemoveEdge: () => void
 }
 
 interface CanvasContextMenuState {
     addEdgeEnabled: boolean,
-    removeNodeEnabled: boolean
+    removeNodeEnabled: boolean,
+    removeEdgeEnabled: boolean
 }
 
 class CanvasContextMenu extends React.Component<CanvasContextMenuProps, CanvasContextMenuState> {
@@ -19,7 +21,8 @@ class CanvasContextMenu extends React.Component<CanvasContextMenuProps, CanvasCo
         super(props);
         this.state = {
             addEdgeEnabled: false,
-            removeNodeEnabled: false
+            removeNodeEnabled: false,
+            removeEdgeEnabled: false
         }
     }
 
@@ -38,6 +41,9 @@ class CanvasContextMenu extends React.Component<CanvasContextMenuProps, CanvasCo
                 <MenuItem onClick={p.onRemoveNode} attributes={{
                     className: 'canvas-context__button'
                 }} disabled={!s.removeNodeEnabled}>Удалить узел</MenuItem>
+                <MenuItem onClick={p.onRemoveEdge} attributes={{
+                    className: 'canvas-context__button'
+                }} disabled={!s.removeEdgeEnabled}>Удалить ребро</MenuItem>
             </ContextMenu>
         );
     }
@@ -51,6 +57,12 @@ class CanvasContextMenu extends React.Component<CanvasContextMenuProps, CanvasCo
     public enableRemoveNode(enable: boolean): void {
         this.setState({
             removeNodeEnabled: enable
+        });
+    }
+
+    public enableRemoveEdge(enable: boolean): void {
+        this.setState({
+            removeEdgeEnabled: enable
         });
     }
 }
