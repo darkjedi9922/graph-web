@@ -26,6 +26,14 @@ class CanvasContextMenu extends React.Component<CanvasContextMenuProps, CanvasCo
         }
     }
 
+    shouldComponentUpdate(nextProps: CanvasContextMenuProps, 
+        nextState: CanvasContextMenuState): boolean 
+    {
+        return nextState.addEdgeEnabled !== this.state.addEdgeEnabled ||
+            nextState.removeNodeEnabled !== this.state.removeNodeEnabled ||
+            nextState.removeEdgeEnabled !== this.state.removeEdgeEnabled;    
+    }
+
     render() {
         const p = this.props;
         const s = this.state;

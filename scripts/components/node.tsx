@@ -38,6 +38,14 @@ class Node extends React.Component<NodeProps, NodeState> {
         this.onTextChange = this.onTextChange.bind(this);
     }
 
+    shouldComponentUpdate(nextProps: NodeProps, nextState: NodeState): boolean {
+        return nextProps.cx !== this.props.cx ||
+            nextProps.cy !== this.props.cy ||
+            nextProps.text !== this.props.text ||
+            nextState.text !== this.state.text ||
+            nextState.editing !== this.state.editing;
+    }
+
     render() {
         const radius = this.props.radius || 25;
         const centerX = this.props.cx || radius;

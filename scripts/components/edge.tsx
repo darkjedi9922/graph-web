@@ -42,6 +42,17 @@ class Edge extends React.Component<EdgeProps, EdgeState>
         this.onTextDidEdit = this.onTextDidEdit.bind(this);
     }
 
+    shouldComponentUpdate(nextProps: EdgeProps, nextState: EdgeState) {
+        return nextProps.end.x !== this.props.end.x ||
+            nextProps.end.y !== this.props.end.y ||
+            nextProps.start.x !== this.props.start.x ||
+            nextProps.start.y !== this.props.start.y ||
+            nextProps.arrow !== this.props.arrow ||
+            nextProps.curve !== this.props.curve ||
+            nextProps.text !== this.props.text ||
+            nextState.edit !== this.state.edit;
+    }
+
     render() {
         // Чтобы не вращать каждый элемент по отдельности, просто берем все элементы
         // в состоянии 0-го градуса и вращаем все целиком в <g>.
