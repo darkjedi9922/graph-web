@@ -3,6 +3,7 @@ import Canvas from './canvas';
 import CanvasContextMenu from './canvas-context-menu';
 import { ContextMenuTrigger } from 'react-contextmenu';
 import { NodeMap, EdgeMap, NodeModel } from '../types';
+import SideTools from './sidetools';
 
 interface GraphState {
     nodes: NodeMap,
@@ -54,6 +55,11 @@ export default class Graph extends React.Component<{}, GraphState>
 
         return (
             <div className="graph">
+                <SideTools
+                    oriented={this.state.oriented}
+                    onOrientedChange={(oriented) => this.setState({oriented})}
+                ></SideTools>
+                <div className="canvas">
                     <Canvas ref={this.canvasRef}
                         nodes={state.nodes} 
                         edges={state.edges}
@@ -67,6 +73,7 @@ export default class Graph extends React.Component<{}, GraphState>
                             edgeAdding ? {x: edgeAdding.x, y: edgeAdding.y} : null
                         }
                     ></Canvas>
+                </div>
                 <CanvasContextMenu ref={this.canvasContextMenuRef}
                     id="canvas-contextmenu"
                     className="canvas-context" 
@@ -75,12 +82,6 @@ export default class Graph extends React.Component<{}, GraphState>
                     onRemoveNode={this.removeLastContextedNode}
                     onRemoveEdge={() => this.removeEdge(this.lastContextedEdgeId)}
                 ></CanvasContextMenu>
-                <div className="graph__buttons">
-                    <span> Граф: </span>
-                    <button onClick={this.toggleArrowEdges.bind(this)}>
-                        {state.oriented ? "Ориентированный" : "Неориентированный"}
-                    </button>
-                </div>
             </div>
         );
     }

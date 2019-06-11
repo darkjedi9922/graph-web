@@ -5,3 +5,13 @@ assets/main.css
 assets/babel.js
 package-lock.json
 build
+
+# Unused fontello files.
+project/fontello-*
+libs/fontello/css/animation.css
+libs/fontello/css/fontello-ie*
+libs/fontello/font/*
+# Use fontello-embedded.css with pre-compiled fonts instead fontello.css.
+libs/fontello/css/fontello.css
+# SVG font is used to load it on fontello icon select service as "save point".
+!libs/fontello/font/fontello.svg

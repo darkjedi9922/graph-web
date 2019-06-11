@@ -1,0 +1,32 @@
+.tools {
+    $button-size: 45px;
+    $highlighted-color: rgb(221, 67, 67);
+    
+    padding-top: 10px;
+
+    &__button {
+        display: block;
+        background: transparent;
+        border: none;
+        color: darkgray;
+        width: $button-size;
+        height: $button-size;
+        line-height: $button-size;
+        text-align: center;
+        font-size: $button-size / 2;
+        outline: none;
+        border-right: 2px solid transparent;
+
+        &:hover {
+            transition: 0.15s;
+            color: $highlighted-color;
+            cursor: pointer;
+        }
+
+        &--activated {
+            transition: 0s!important;
+            color: $highlighted-color;
+            border-right: 2px solid $highlighted-color;
+        }
+    }
+}
