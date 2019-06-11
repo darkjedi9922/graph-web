@@ -59,3 +59,23 @@ body {
         }
     }
 }
+
+.graph__node {
+    width: 50px;
+    height: 50px;
+    fill: white;
+    border-radius: 100%;
+    text-align: center;
+    line-height: 50px;
+    font-size: 20px;
+    display: inline-block;
+    stroke-width: 2px;
+    stroke: black;
+    color: black;
+}
+.graph__node-text {
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    user-select: none;
+    cursor: default;
+}

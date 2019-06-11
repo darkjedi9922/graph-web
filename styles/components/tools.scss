@@ -1,6 +1,6 @@
 .tools {
-    $button-size: 45px;
-    $highlighted-color: rgb(221, 67, 67);
+    $button-size: 40px;
+    $highlighted-color: #263947;
     
     padding-top: 10px;
 
@@ -15,7 +15,7 @@
         text-align: center;
         font-size: $button-size / 2;
         outline: none;
-        border-right: 2px solid transparent;
+        margin: 0 5px;
 
         &:hover {
             transition: 0.15s;
@@ -25,8 +25,17 @@
 
         &--activated {
             transition: 0s!important;
-            color: $highlighted-color;
-            border-right: 2px solid $highlighted-color;
+            color: white;
+            background: $highlighted-color;
+            border-radius: 10%;
+
+            &:not(:first-of-type) {
+                margin-top: 5px;
+            }
+
+            &:hover {
+                color: white;
+            }
         }
     }
 }
