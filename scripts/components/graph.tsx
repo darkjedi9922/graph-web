@@ -4,6 +4,7 @@ import CanvasContextMenu from './canvas-context-menu';
 import { ContextMenuTrigger } from 'react-contextmenu';
 import { NodeMap, EdgeMap, NodeModel } from '../types';
 import SideTools from './sidetools';
+import Menu from './menu';
 
 interface GraphState {
     nodes: NodeMap,
@@ -54,34 +55,37 @@ export default class Graph extends React.Component<{}, GraphState>
         const edgeAdding = state.edgeAdding;
 
         return (
-            <div className="graph">
-                <SideTools
-                    oriented={this.state.oriented}
-                    onOrientedChange={(oriented) => this.setState({oriented})}
-                ></SideTools>
-                <div className="canvas">
-                    <Canvas ref={this.canvasRef}
-                        nodes={state.nodes} 
-                        edges={state.edges}
-                        oriented={state.oriented} 
-                        onNodeClick={this.onNodeClick} 
-                        onNodeMove={this.moveNode} 
-                        onEdgeCurve={this.onEdgeCurve} 
-                        onEdgeTextChange={this.onEdgeTextChange}
-                        onContextMenu={this.onCanvasContextMenu}
-                        addedEdgeEndPos={
-                            edgeAdding ? {x: edgeAdding.x, y: edgeAdding.y} : null
-                        }
-                    ></Canvas>
+            <div className="app">
+                <Menu></Menu>
+                <div className="app__graph graph">
+                    <SideTools
+                        oriented={this.state.oriented}
+                        onOrientedChange={(oriented) => this.setState({ oriented })}
+                    ></SideTools>
+                    <div className="canvas">
+                        <Canvas ref={this.canvasRef}
+                            nodes={state.nodes}
+                            edges={state.edges}
+                            oriented={state.oriented}
+                            onNodeClick={this.onNodeClick}
+                            onNodeMove={this.moveNode}
+                            onEdgeCurve={this.onEdgeCurve}
+                            onEdgeTextChange={this.onEdgeTextChange}
+                            onContextMenu={this.onCanvasContextMenu}
+                            addedEdgeEndPos={
+                                edgeAdding ? { x: edgeAdding.x, y: edgeAdding.y } : null
+                            }
+                        ></Canvas>
+                    </div>
+                    <CanvasContextMenu ref={this.canvasContextMenuRef}
+                        id="canvas-contextmenu"
+                        className="canvas-context"
+                        onAddNodeClick={this.onAddNodeClick.bind(this)}
+                        onAddEdgeClick={this.onAddEdgeClick.bind(this)}
+                        onRemoveNode={this.removeLastContextedNode}
+                        onRemoveEdge={() => this.removeEdge(this.lastContextedEdgeId)}
+                    ></CanvasContextMenu>
                 </div>
-                <CanvasContextMenu ref={this.canvasContextMenuRef}
-                    id="canvas-contextmenu"
-                    className="canvas-context" 
-                    onAddNodeClick={this.onAddNodeClick.bind(this)}
-                    onAddEdgeClick={this.onAddEdgeClick.bind(this)}
-                    onRemoveNode={this.removeLastContextedNode}
-                    onRemoveEdge={() => this.removeEdge(this.lastContextedEdgeId)}
-                ></CanvasContextMenu>
             </div>
         );
     }

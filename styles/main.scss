@@ -2,6 +2,7 @@
 @import '../libs/fontello/css/fontello-embedded.css';
 @import '../libs/fontello/css/fontello-codes.css';
 @import './components/tools.scss';
+@import './components/menu.scss';
 
 html, body {
     height: 100%;
@@ -12,6 +13,16 @@ body {
 
 #graph-app {
     height: 100%;
+}
+
+.app {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+
+    &__graph {
+        flex-grow: 1;
+    }
 }
 
 .graph {
