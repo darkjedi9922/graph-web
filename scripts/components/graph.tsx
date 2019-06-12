@@ -5,6 +5,7 @@ import { ContextMenuTrigger } from 'react-contextmenu';
 import { NodeMap, EdgeMap, NodeModel } from '../types';
 import SideTools from './sidetools';
 import Menu from './menu';
+import * as appAPI from '../desktop';
 
 interface GraphState {
     nodes: NodeMap,
@@ -48,6 +49,7 @@ export default class Graph extends React.Component<{}, GraphState>
         this.onEdgeTextChange = this.onEdgeTextChange.bind(this);
         this.onCanvasContextMenu = this.onCanvasContextMenu.bind(this);
         this.removeLastContextedNode = this.removeLastContextedNode.bind(this);
+        this.onSaveAs = this.onSaveAs.bind(this);
     }
 
     render() {
@@ -56,7 +58,9 @@ export default class Graph extends React.Component<{}, GraphState>
 
         return (
             <div className="app">
-                <Menu></Menu>
+                <Menu
+                    onFileSaveAs={this.onSaveAs}
+                ></Menu>
                 <div className="app__graph graph">
                     <SideTools
                         oriented={this.state.oriented}
@@ -274,5 +278,9 @@ export default class Graph extends React.Component<{}, GraphState>
         contextMenu.enableRemoveEdge(edgeId !== -1);
         this.lastContextedNodeId = nodeId;
         this.lastContextedEdgeId = edgeId;
+    }
+
+    public onSaveAs() {
+        const savedFile = appAPI.saveAs(JSON.stringify(this.state));
     }
 }
