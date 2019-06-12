@@ -1,12 +1,6 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
 const process = require('process');
-const webpackConfig = require('./webpack.config');
-
-const { 
-    default: installExtension, 
-    REACT_DEVELOPER_TOOLS
-} = require('electron-devtools-installer');
 
 // Далее создаётся ссылка на объект Window. Это делается для того, чтобы окно не 
 // закрывалось автоматически, когда объект будет обработан сборщиком мусора.
@@ -17,7 +11,12 @@ var reactDevTools = null;
 
 app.on('ready', function () {
     // Так как используем React, установим react-dev-tools.
-    if (webpackConfig.mode === 'development') {
+    if (process.env.NODE_DEV) {
+        const {
+            default: installExtension,
+            REACT_DEVELOPER_TOOLS
+        } = require('electron-devtools-installer');
+        
         installExtension(REACT_DEVELOPER_TOOLS)
             .then((name) => {
                 reactDevTools = name;

@@ -2,6 +2,7 @@ const path = require('path');
 const glob = require('glob');
 const onceImporter = require('node-sass-once-importer');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const process = require('process');
 
 function globs(entries) {
     let result = [];
@@ -15,7 +16,7 @@ function globs(entries) {
 module.exports = {
     context: __dirname,
     target: 'electron-main',
-    mode: 'development',
+    mode: process.env.NODE_DEV ? 'development' : 'production',
     devtool: "source-map",
     entry: {
         'main.css': ['./styles/main.scss'],

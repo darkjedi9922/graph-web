@@ -4,9 +4,9 @@
   "description": "An app to draw graphs.",
   "main": "main.js",
   "scripts": {
-    "webpack": "webpack",
-    "webpack-watch": "webpack --watch",
-    "start": "electron .",
+    "webpack": "cross-env NODE_DEV=true webpack",
+    "webpack-watch": "cross-env NODE_DEV=true webpack --watch",
+    "start": "cross-env NODE_DEV=true electron .",
     "build-win32": "electron-packager . Graph --platform=win32 --arch=ia32 --electron-version=3.1.1 --app-version=1.0.0 --out=build --ignore=build --ignore=node_modules --ignore=scripts --ignore=styles --overwrite",
     "build-linux": "electron-packager . Graph --platform=linux --arch=ia32 --electron-version=3.1.1 --app-version=1.0.0 --out=build --ignore=build --ignore=node_modules --ignore=scripts --ignore=styles --overwrite"
   },
@@ -23,6 +23,7 @@
     "@types/react": "^16.8.19",
     "@types/react-dom": "^16.8.4",
     "babel-loader": "^8.0.6",
+    "cross-env": "^5.2.0",
     "css-loader": "^2.1.1",
     "electron": "3.1.1",
     "electron-devtools-installer": "^2.2.4",
@@ -45,6 +46,5 @@
     "watchify": "^3.11.1",
     "webpack": "^4.33.0",
     "webpack-cli": "^3.3.2"
-  },
-  "dependencies": {}
+  }
 }
