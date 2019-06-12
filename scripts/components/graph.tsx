@@ -15,15 +15,15 @@ interface GraphState {
         x: number,
         y: number,
         mouseEventListener: (e: MouseEvent) => void
-    }
+    },
+    nodesCount: number,
+    nextNodeId: number,
+    nextEdgeId: number,
+    lastAddedEdgeId: number
 }
 
 export default class Graph extends React.Component<{}, GraphState>
 {
-    private nodesCount: number = 0;
-    private nextNodeId: number = 1;
-    private nextEdgeId: number = 1;
-    private lastAddedEdgeId: number | null = null;
     private lastContextedNodeId: number = -1;
     private lastContextedEdgeId: number = -1;
     private canvasRef = React.createRef<Canvas>();
@@ -40,7 +40,11 @@ export default class Graph extends React.Component<{}, GraphState>
             nodes: {},
             edges: {},
             oriented: false,
-            edgeAdding: null
+            edgeAdding: null,
+            nodesCount: 0,
+            nextNodeId: 1,
+            nextEdgeId: 1,
+            lastAddedEdgeId: null
         };
 
         this.onNodeClick = this.onNodeClick.bind(this);
@@ -50,6 +54,7 @@ export default class Graph extends React.Component<{}, GraphState>
         this.onCanvasContextMenu = this.onCanvasContextMenu.bind(this);
         this.removeLastContextedNode = this.removeLastContextedNode.bind(this);
         this.onSaveAs = this.onSaveAs.bind(this);
+        this.onOpen = this.onOpen.bind(this);
     }
 
     render() {
@@ -59,6 +64,7 @@ export default class Graph extends React.Component<{}, GraphState>
         return (
             <div className="app">
                 <Menu
+                    onOpen={this.onOpen}
                     onFileSaveAs={this.onSaveAs}
                 ></Menu>
                 <div className="app__graph graph">
@@ -144,9 +150,9 @@ export default class Graph extends React.Component<{}, GraphState>
                 let newNodes = {...state.nodes};
                 delete newNodes[nodeId];
                 return newNodes;
-            })()
+            })(),
+            nodesCount: state.nodesCount - 1
         }));
-        this.nodesCount -= 1;
     }
 
     public removeEdge(id: number): void {
@@ -187,8 +193,8 @@ export default class Graph extends React.Component<{}, GraphState>
 
         // Если мы в процессе добавления ребра, значит сам элемент уже был добавлен.
         this.setState((function(this: Graph, state: GraphState) {
-            state.nodes[id].endEdges.push(this.lastAddedEdgeId);
-            state.edges[this.lastAddedEdgeId].endNodeId = id;
+            state.nodes[id].endEdges.push(state.lastAddedEdgeId);
+            state.edges[state.lastAddedEdgeId].endNodeId = id;
             state.edgeAdding = null;
             return state;
         }).bind(this));
@@ -227,19 +233,19 @@ export default class Graph extends React.Component<{}, GraphState>
     addNode(options) {
         this.setState((state, props) => ({
             nodes: (function (this: Graph) {
-                state.nodes[this.nextNodeId] = {
-                    id: this.nextNodeId,
-                    text: this.nextNodeId.toString(),
+                state.nodes[state.nextNodeId] = {
+                    id: state.nextNodeId,
+                    text: state.nextNodeId.toString(),
                     radius: 25,
                     x: options.pos.x,
                     y: options.pos.y,
                     startEdges: [],
                     endEdges: []
                 };
-                this.nextNodeId += 1;
-                this.nodesCount += 1;
                 return state.nodes;
-            }).bind(this)()
+            }).bind(this)(),
+            nodesCount: state.nodesCount + 1,
+            nextNodeId: state.nextNodeId + 1
         }));
     }
 
@@ -249,9 +255,8 @@ export default class Graph extends React.Component<{}, GraphState>
     addEdge(startNodeId, endNodeId) {
         if (startNodeId === endNodeId) return;
 
-        const newEdgeId = this.nextEdgeId++;
-
-        this.setState((function(state, props) {
+        this.setState((function(state: GraphState) {
+            const newEdgeId = state.nextEdgeId;
             const newEdge = {
                 startNodeId: startNodeId,
                 endNodeId: endNodeId,
@@ -263,17 +268,17 @@ export default class Graph extends React.Component<{}, GraphState>
             state.nodes[startNodeId].startEdges.push(newEdgeId);
             if (endNodeId !== null) state.nodes[endNodeId].endEdges.push(newEdgeId);
 
+            state.nextEdgeId += 1;
+            state.lastAddedEdgeId = newEdgeId;
+
             return state;
         }).bind(this));
-
-        this.lastAddedEdgeId = newEdgeId;
-        return newEdgeId;
     }
 
     onCanvasContextMenu(e, nodeId: number, edgeId: number): void {
         (this.contextMenuTrigger as any).handleContextClick(e);
         const contextMenu = this.canvasContextMenuRef.current
-        contextMenu.enableAddEdge(this.nodesCount > 1 && nodeId !== -1)
+        contextMenu.enableAddEdge(this.state.nodesCount > 1 && nodeId !== -1)
         contextMenu.enableRemoveNode(nodeId !== -1);
         contextMenu.enableRemoveEdge(edgeId !== -1);
         this.lastContextedNodeId = nodeId;
@@ -281,6 +286,34 @@ export default class Graph extends React.Component<{}, GraphState>
     }
 
     public onSaveAs() {
+        // If saving is cancelled, savedFile is an empty.
         const savedFile = appAPI.saveAs(JSON.stringify(this.state));
+    }
+
+    public onOpen() {
+        const contents = appAPI.open();
+        
+        // If opening is cancelled, contents is an empty. 
+        if (!contents) return;
+        
+        // Мог быть выбран файл неправильного формата.
+        try {
+            // Parse can throw an error.
+            const parsed = JSON.parse(contents) as object;
+            // We must be sure that the parsed object is a graph state.
+            if (!this.isState(parsed)) throw 'The object is not a graph state.';
+            // Further everything is ok.
+            this.setState(parsed);
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    private isState(value: object): boolean {
+        const valueKeys = Object.keys(value);
+        const stateKeys = Object.keys(this.state);
+        console.dir(valueKeys);
+        console.dir(stateKeys);
+        return JSON.stringify(valueKeys) === JSON.stringify(stateKeys);
     }
 }

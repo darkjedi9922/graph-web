@@ -8,6 +8,9 @@ const appFilesFilters = [{
     name: 'graph'
 }];
 
+/**
+ * If saving was cancelled, returns an empty string.
+ */
 export function saveAs(contents: string): string {
     const file = dialog.showSaveDialog({
         defaultPath: 'new-graph',
@@ -20,6 +23,9 @@ export function saveAs(contents: string): string {
     return file;
 }
 
+/**
+ * If opening was cancelled, returns an empty string.
+ */
 export function open(): string {
     const files = dialog.showOpenDialog({
         filters: appFilesFilters,
