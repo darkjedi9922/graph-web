@@ -9,6 +9,7 @@ interface CanvasProps {
     oriented: boolean,
     onNodeClick: (id: number) => void,
     onNodeMove: (id: number, x: number, y: number) => void,
+    onNodeTextChange: (id: number, text: string) => void,
     onEdgeCurve: (id: number, curve: number) => void,
     onEdgeTextChange: (id: number, text: string) => void,
     onContextMenu: (event: React.MouseEvent, nodeId: number, edgeId: number) => void,
@@ -59,6 +60,7 @@ class Canvas extends React.Component<CanvasProps>
                 className='graph__node'
                 onMove={(x, y) => this.props.onNodeMove(Number.parseInt(id), x, y)}
                 onClick={() => this.props.onNodeClick(Number.parseInt(id))} 
+                onTextChange={(text) => this.props.onNodeTextChange(Number.parseInt(id), text)}
                 onContextMenu={(e) => this.props.onContextMenu(e, Number.parseInt(id), -1)}
             />);
         }

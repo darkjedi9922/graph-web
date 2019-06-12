@@ -10,11 +10,11 @@ interface NodeProps {
     className: string,
     onClick: (e: React.MouseEvent) => void,
     onMove: (x: number, y: number) => void,
-    onContextMenu: (e: React.MouseEvent) => void
+    onContextMenu: (e: React.MouseEvent) => void,
+    onTextChange: (text: string) => void
 }
 
 interface NodeState {
-    text: string,
     editing: boolean
 }
 
@@ -30,7 +30,6 @@ class Node extends React.Component<NodeProps, NodeState> {
     constructor(props) {
         super(props);
         this.state = {
-            text: props.text,
             editing: false
         }
 
@@ -42,7 +41,7 @@ class Node extends React.Component<NodeProps, NodeState> {
         return nextProps.cx !== this.props.cx ||
             nextProps.cy !== this.props.cy ||
             nextProps.text !== this.props.text ||
-            nextState.text !== this.state.text ||
+            nextProps.text !== this.props.text ||
             nextState.editing !== this.state.editing;
     }
 
@@ -61,7 +60,7 @@ class Node extends React.Component<NodeProps, NodeState> {
                     onDoubleClick={this.onTextWillEdit}
                     onContextMenu={this.props.onContextMenu}
                 />
-                <EditableSvgText text={this.state.text} edit={this.state.editing} 
+                <EditableSvgText text={this.props.text} edit={this.state.editing} 
                     rect={{
                         x: centerX - radius,
                         y: centerY - radius,
@@ -119,9 +118,9 @@ class Node extends React.Component<NodeProps, NodeState> {
 
     onTextChange(text) {
         this.setState({
-            text: text,
             editing: false
         });
+        this.props.onTextChange(text);
     }
 }
 

@@ -49,6 +49,7 @@ export default class Graph extends React.Component<{}, GraphState>
 
         this.onNodeClick = this.onNodeClick.bind(this);
         this.moveNode = this.moveNode.bind(this);
+        this.setNodeText = this.setNodeText.bind(this);
         this.onEdgeCurve = this.onEdgeCurve.bind(this);
         this.onEdgeTextChange = this.onEdgeTextChange.bind(this);
         this.onCanvasContextMenu = this.onCanvasContextMenu.bind(this);
@@ -79,6 +80,7 @@ export default class Graph extends React.Component<{}, GraphState>
                             oriented={state.oriented}
                             onNodeClick={this.onNodeClick}
                             onNodeMove={this.moveNode}
+                            onNodeTextChange={this.setNodeText}
                             onEdgeCurve={this.onEdgeCurve}
                             onEdgeTextChange={this.onEdgeTextChange}
                             onContextMenu={this.onCanvasContextMenu}
@@ -198,6 +200,14 @@ export default class Graph extends React.Component<{}, GraphState>
             state.edgeAdding = null;
             return state;
         }).bind(this));
+    }
+
+    setNodeText(id: number, text: string): void {
+        this.setState((state) => {
+            let newState = {...state}
+            newState.nodes[id].text = text;
+            return newState;
+        });
     }
 
     onEdgeCurve(id, curve) {
