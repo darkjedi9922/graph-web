@@ -14,6 +14,7 @@ function globs(entries) {
 
 module.exports = {
     context: __dirname,
+    target: 'electron-main',
     mode: 'development',
     devtool: "source-map",
     entry: {
