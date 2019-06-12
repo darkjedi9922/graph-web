@@ -132,9 +132,8 @@ class Edge extends React.Component<EdgeProps, EdgeState>
 
     onMouseDown(e) {
         const start = this.props.start;
-        // TODO: Вычислять координату с учетом размещения холста.
-        const eventX = e.clientX - 10;
-        const eventY = e.clientY - 10;
+        const eventX = e.clientX;
+        const eventY = e.clientY;
         const degree = this.calcDegree();
         const planeStart = gmath.rotatePoint({x: eventX, y: eventY}, start, degree);
         this.curving = {
@@ -152,10 +151,8 @@ class Edge extends React.Component<EdgeProps, EdgeState>
         const start = this.props.start;
         const degree = this.calcDegree();
 
-        // Warning: При задании padding это слезет.
-        // TODO: Вычислять координату с учетом размещения холста.
-        var x = e.offsetX;
-        var y = e.offsetY;
+        var x = e.clientX;
+        var y = e.clientY;
         const planeEventPoint = gmath.rotatePoint({x: x, y: y}, start, degree);
 
         const curve = planeEventPoint.y - this.curving.planeStart.y;
