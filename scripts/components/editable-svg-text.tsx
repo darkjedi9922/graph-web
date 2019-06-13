@@ -39,25 +39,14 @@ class EditableSvgText extends React.Component<EditableSvgTextProps> {
         const rect = this.props.rect;
         const text = this.props.text;
 
-        return (<>
-            {!this.props.edit ? 
-                <text x={rect.x + rect.width / 2} y={rect.y + rect.height / 2}
-                    className={this.props.className} 
-                    style={Object.assign({ userSelect: "none"}, this.props.style)}
-                    textAnchor="middle" alignmentBaseline="central"
-                    transform={this.props.transform}
-                    onDoubleClick={this.startEditing}
-                    onMouseDown={this.props.onMouseDown}
-                    onMouseUp={this.props.onMouseUp} 
-                    onClick={this.props.onClick}
-                    onContextMenu={this.props.onContextMenu}
-                >
-                    {text}
-                </text>
-                :
-                <foreignObject x={rect.x} y={rect.y}
-                    width={rect.width} height={rect.height}>
-                    <input defaultValue={text} ref={this.inputRef} 
+        return (
+            <foreignObject x={rect.x} y={rect.y}
+                width={rect.width} height={rect.height} 
+                transform={this.props.transform}>
+                <input defaultValue={text} ref={this.inputRef}
+                    // onDoubleClick event does not fire on disabled inputs, so
+                    // we make it read-only.
+                    readOnly={!this.props.edit}
                     className={this.props.className}
                     style={Object.assign({
                         background: "transparent",
@@ -66,14 +55,16 @@ class EditableSvgText extends React.Component<EditableSvgTextProps> {
                         height: "100%",
                         width: "100%",
                         outline: "none",
+                        cursor: this.props.edit ? "auto" : "pointer"
                     }, this.props.style)} 
                     onDoubleClick={this.startEditing} 
                     onBlur={this.stopEditing}
-                    onKeyDown={this.onKeyDown} 
-                    onContextMenu={this.props.onContextMenu}/>
-                </foreignObject>
-            }
-        </>);
+                    onKeyDown={this.onKeyDown}
+                    onContextMenu={this.props.edit ? null : this.props.onContextMenu}
+                    onMouseDown={this.props.edit ? null : this.props.onMouseDown}
+                    onMouseUp={this.props.edit ? null : this.props.onMouseUp}
+                />
+            </foreignObject>);
     }
 
     startEditing() {

@@ -94,7 +94,7 @@ class Edge extends React.Component<EdgeProps, EdgeState>
         const fontSize = 12;
         const textRect = {
             x: x1,
-            y: y1 + curve + (curve > 0 ? 2 : - (fontSize + 2)),
+            y: y1 + curve + (curve > 0 ? 2 : - (fontSize + 2)) - 3,
             width: planeLength,
             height: fontSize
         };
@@ -111,7 +111,7 @@ class Edge extends React.Component<EdgeProps, EdgeState>
                     transform={`rotate(
                         ${degree > 90 && degree < 270 ? 180 : 0} 
                         ${textRect.x + textRect.width / 2} 
-                        ${textRect.y + textRect.height / 2}
+                        ${textRect.y + 3 + textRect.height / 2}
                     )`}
                     onMouseDown={this.onMouseDown}
                     onWillEdit={this.onTextWillEdit}
@@ -130,7 +130,10 @@ class Edge extends React.Component<EdgeProps, EdgeState>
         return gmath.calcVectorLength(this.props.start, this.props.end);
     }
 
-    onMouseDown(e) {
+    onMouseDown(e: React.MouseEvent) {
+        // Если клик на тексте, то preventDefault запретит его выделение.
+        e.preventDefault();
+
         const start = this.props.start;
         const eventX = e.clientX;
         const eventY = e.clientY;
