@@ -13,7 +13,7 @@ interface EditableSvgTextProps {
     className?: string,
     transform?: string,
     onMouseDown: (e: React.MouseEvent) => void,
-    onMouseUp?: (e: React.MouseEvent) => void,
+    onMouseUp?: (e: MouseEvent) => void,
     onClick?: (e: React.MouseEvent) => void,
     onContextMenu?: (e: React.MouseEvent) => void,
     onWillEdit?: () => void,
@@ -29,6 +29,7 @@ class EditableSvgText extends React.Component<EditableSvgTextProps> {
         this.startEditing = this.startEditing.bind(this);
         this.stopEditing = this.stopEditing.bind(this);
         this.onKeyDown = this.onKeyDown.bind(this);
+        this.onMouseDown = this.onMouseDown.bind(this);
     }
 
     componentDidUpdate() {
@@ -61,8 +62,7 @@ class EditableSvgText extends React.Component<EditableSvgTextProps> {
                     onBlur={this.stopEditing}
                     onKeyDown={this.onKeyDown}
                     onContextMenu={this.props.edit ? null : this.props.onContextMenu}
-                    onMouseDown={this.props.edit ? null : this.props.onMouseDown}
-                    onMouseUp={this.props.edit ? null : this.props.onMouseUp}
+                    onMouseDown={this.onMouseDown}
                 />
             </foreignObject>);
     }
@@ -78,6 +78,24 @@ class EditableSvgText extends React.Component<EditableSvgTextProps> {
 
     onKeyDown(e) {
         if (e.keyCode === 13) this.stopEditing();
+    }
+
+    onMouseDown(e: React.MouseEvent) {
+        if (this.props.edit) return;
+
+        // Если назначать onMouseUp на сам элемент, то он не сработает, если после
+        // перемещения элемента он окажется под другим элементом. Тогда onMouseUp
+        // сработает на том другом элементе, а должен на этом. Поэтому поставим
+        // обработчик onMouseUp на body, при onMouseDown на элементе. Тогда точно
+        // поймем, что если произошел onMouseUp, то он относится к этому элементу.  
+        const self = this as EditableSvgText;
+        const mouseupListener = function (this: HTMLElement, e: MouseEvent) {
+            document.body.removeEventListener('mouseup', mouseupListener);
+            if (self.props.onMouseUp) self.props.onMouseUp(e);
+        };
+        document.body.addEventListener('mouseup', mouseupListener);
+
+        this.props.onMouseDown(e);
     }
 }
 
