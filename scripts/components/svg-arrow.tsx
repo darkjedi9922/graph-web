@@ -8,7 +8,7 @@ interface SvgArrowProps {
         end: Point
     },
     size: number,
-    onDoubleClick: (e: React.MouseEvent) => void,
+    onClick: () => void,
     onMouseDown: (e: React.MouseEvent) => void,
     onContextMenu: (e: React.MouseEvent) => void
 }
@@ -35,7 +35,7 @@ class SvgArrow extends React.Component<SvgArrowProps> {
                 ${(start.y + size * normal.y / (size * 2))}
                 ${(start.x + size * -normal.x / (size * 2))},
                 ${(start.y + size * -normal.y / (size * 2))}`}
-                onDoubleClick={this.props.onDoubleClick}
+                onClick={this.props.onClick}
                 onMouseDown={this.props.onMouseDown}
                 onContextMenu={this.props.onContextMenu}
             ></polygon>

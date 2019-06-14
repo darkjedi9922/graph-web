@@ -8,6 +8,7 @@ interface CanvasProps {
     edges: EdgeMap,
     oriented: boolean,
     onNodeClick: (id: number) => void,
+    onEdgeClick: (id: number) => void,
     onNodeMove: (id: number, x: number, y: number) => void,
     onNodeTextChange: (id: number, text: string) => void,
     onEdgeCurve: (id: number, curve: number) => void,
@@ -78,6 +79,7 @@ class Canvas extends React.Component<CanvasProps>
                 start={this._getEdgeStartPos(id)} end={this._getEdgeEndPos(id)}
                 curve={edge.curve} text={edge.text}
                 nodeRadius={this._isAddedEdge(id) ? 0 : 25}
+                onClick={() => this.props.onEdgeClick(Number.parseInt(id))}
                 onCurve={(curve) => this.props.onEdgeCurve(Number.parseInt(id), curve)}
                 onTextChange={(text) => this.props.onEdgeTextChange(Number.parseInt(id), text)}
                 onContextMenu={(e) => this.props.onContextMenu(e, -1, Number.parseInt(id))}    

@@ -1,5 +1,4 @@
 import React from 'react';
-import EditableSvgText from './editable-svg-text';
 
 interface NodeProps {
     id: number,
@@ -14,11 +13,7 @@ interface NodeProps {
     onTextChange: (text: string) => void
 }
 
-interface NodeState {
-    editing: boolean
-}
-
-class Node extends React.Component<NodeProps, NodeState> {
+class Node extends React.Component<NodeProps> {
     private moving: {
         startX: number,
         startY: number,
@@ -32,17 +27,12 @@ class Node extends React.Component<NodeProps, NodeState> {
         this.state = {
             editing: false
         }
-
-        this.onTextWillEdit = this.onTextWillEdit.bind(this);
-        this.onTextChange = this.onTextChange.bind(this);
     }
 
-    shouldComponentUpdate(nextProps: NodeProps, nextState: NodeState): boolean {
+    shouldComponentUpdate(nextProps: NodeProps): boolean {
         return nextProps.cx !== this.props.cx ||
             nextProps.cy !== this.props.cy ||
-            nextProps.text !== this.props.text ||
-            nextProps.text !== this.props.text ||
-            nextState.editing !== this.state.editing;
+            nextProps.text !== this.props.text;
     }
 
     render() {
@@ -54,28 +44,26 @@ class Node extends React.Component<NodeProps, NodeState> {
             <g>
                 <circle r={radius} cx={centerX} cy={centerY} 
                     className={this.props.className}
-                    onMouseDown={this.onMouseDown.bind(this)}
-                    onMouseUp={this.onMouseUp.bind(this)}
-                    onClick={this.props.onClick}
-                    onDoubleClick={this.onTextWillEdit}
-                    onContextMenu={this.props.onContextMenu}
-                />
-                <EditableSvgText text={this.props.text} edit={this.state.editing} 
-                    rect={{
-                        x: centerX - radius,
-                        y: centerY - radius,
-                        width: radius * 2,
-                        height: radius * 2
-                    }} className="graph__node-text" style={{
-                        
+                    onClick={(e) => {
+                        if (!this.moving) this.props.onClick(e);
                     }}
-                    onClick={this.props.onClick}
                     onMouseDown={this.onMouseDown.bind(this)}
                     onMouseUp={this.onMouseUp.bind(this)}
-                    onWillEdit={this.onTextWillEdit}
-                    onDidEdit={this.onTextChange} 
                     onContextMenu={this.props.onContextMenu}
                 />
+                <text x={centerX} y={centerY}
+                    className="graph__node-text"
+                    style={{ userSelect: "none" }}
+                    textAnchor="middle" alignmentBaseline="central"
+                    onClick={(e) => {
+                        if (!this.moving) this.props.onClick(e);
+                    }}
+                    onMouseDown={this.onMouseDown.bind(this)}
+                    onMouseUp={this.onMouseUp.bind(this)}
+                    onContextMenu={this.props.onContextMenu}
+                >
+                    {this.props.text}
+                </text>
             </g>
         );
     }
@@ -110,17 +98,6 @@ class Node extends React.Component<NodeProps, NodeState> {
         if (!this.moving) return;
         document.body.removeEventListener('mousemove', this.moving.listener);
         this.moving = null;
-    }
-
-    onTextWillEdit() {
-        this.setState({ editing: true });
-    }
-
-    onTextChange(text) {
-        this.setState({
-            editing: false
-        });
-        this.props.onTextChange(text);
     }
 }
 

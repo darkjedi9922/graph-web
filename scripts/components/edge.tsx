@@ -1,6 +1,5 @@
 import React from 'react';
 import SvgArrow from './svg-arrow';
-import EditableSvgText from './editable-svg-text';
 
 import * as gmath from '../libs/gmath';
 import { Point } from '../types';
@@ -12,16 +11,13 @@ interface EdgeProps {
     nodeRadius: number,
     text: string,
     arrow: boolean,
+    onClick: () => void,
     onCurve: (curve) => void
     onTextChange: (text) => void,
     onContextMenu: (e: React.MouseEvent) => void
 }
 
-interface EdgeState {
-    edit: boolean
-}
-
-class Edge extends React.Component<EdgeProps, EdgeState>
+class Edge extends React.Component<EdgeProps>
 {
     private curving: {
         startX: number,
@@ -38,19 +34,16 @@ class Edge extends React.Component<EdgeProps, EdgeState>
         this.onMouseDown = this.onMouseDown.bind(this);
         this.onMouseMove = this.onMouseMove.bind(this);
         this.onMouseUp = this.onMouseUp.bind(this);
-        this.onTextWillEdit = this.onTextWillEdit.bind(this);
-        this.onTextDidEdit = this.onTextDidEdit.bind(this);
     }
 
-    shouldComponentUpdate(nextProps: EdgeProps, nextState: EdgeState) {
+    shouldComponentUpdate(nextProps: EdgeProps) {
         return nextProps.end.x !== this.props.end.x ||
             nextProps.end.y !== this.props.end.y ||
             nextProps.start.x !== this.props.start.x ||
             nextProps.start.y !== this.props.start.y ||
             nextProps.arrow !== this.props.arrow ||
             nextProps.curve !== this.props.curve ||
-            nextProps.text !== this.props.text ||
-            nextState.edit !== this.state.edit;
+            nextProps.text !== this.props.text;
     }
 
     render() {
@@ -85,35 +78,41 @@ class Edge extends React.Component<EdgeProps, EdgeState>
             const arrowStart = virtualPath.getPointAtLength(pathLength - nodeRadius - arrowSize);
             arrowElement = <SvgArrow vector={{start: arrowStart, end: arrowEnd}}
                 size={arrowSize}
-                onDoubleClick={this.onTextWillEdit}
+                onClick={this.props.onClick}
                 onMouseDown={this.onMouseDown}
                 onContextMenu={this.props.onContextMenu}
             />
         }
 
         const fontSize = 12;
-        const textRect = {
-            x: x1,
-            y: y1 + curve + (curve > 0 ? 2 : - (fontSize + 2)) - 3,
-            width: planeLength,
-            height: fontSize
+        const textCenter = {
+            x: x1 + planeLength / 2,
+            y: y1 + curve + (curve > 0 ? 2 : - (fontSize + 2)) + fontSize / 2
         };
+        let mirrorTransform = null;
+        if (degree > 90 && degree < 270)
+            mirrorTransform = `rotate(180 ${textCenter.x} ${textCenter.y})`;
 
         return (
             <g transform={"rotate(" + gmath.toHtmlDeg(degree) + " " + x1 + " " + y1 + ")"} >
                 <path fill="none" d={d} stroke="black" strokeWidth="2"
                     onMouseDown={this.onMouseDown}
-                    onDoubleClick={this.onTextWillEdit}
+                    onClick={this.props.onClick}
                     onContextMenu={this.props.onContextMenu}
                 ></path>
                 {arrowElement}
-                <EditableSvgText text={text} rect={textRect} edit={this.state.edit}
-                    parentRotate={{ deg: degree, origin: {x: x1, y: y1} }}
+                <text x={textCenter.x} y={textCenter.y}
+                    style={{ userSelect: "none" }}
+                    textAnchor="middle" alignmentBaseline="central"
+                    transform={mirrorTransform}
+                    onClick={() => {
+                        if (!this.curving) this.props.onClick();
+                    }}
                     onMouseDown={this.onMouseDown}
-                    onWillEdit={this.onTextWillEdit}
-                    onDidEdit={this.onTextDidEdit}
                     onContextMenu={this.props.onContextMenu}
-                />
+                >
+                    {text}
+                </text>
             </g>
         );
     }
@@ -127,9 +126,6 @@ class Edge extends React.Component<EdgeProps, EdgeState>
     }
 
     onMouseDown(e: React.MouseEvent) {
-        // Если клик на тексте, то preventDefault запретит его выделение.
-        e.preventDefault();
-
         const start = this.props.start;
         const eventX = e.clientX;
         const eventY = e.clientY;
@@ -162,15 +158,6 @@ class Edge extends React.Component<EdgeProps, EdgeState>
         document.body.removeEventListener('mousemove', this.onMouseMove);
         document.body.removeEventListener('mouseup', this.onMouseUp);
         this.curving = null;
-    }
-
-    onTextWillEdit() {
-        this.setState({ edit: true });
-    }
-
-    onTextDidEdit(text) {
-        this.setState({ edit: false });
-        this.props.onTextChange && this.props.onTextChange(text);
     }
 }
 

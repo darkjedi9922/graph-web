@@ -19,7 +19,8 @@ interface GraphState {
     nodesCount: number,
     nextNodeId: number,
     nextEdgeId: number,
-    lastAddedEdgeId: number
+    lastAddedEdgeId: number,
+    selectedObject: { type: 'node' | 'edge', id: number }
 }
 
 export default class Graph extends React.Component<{}, GraphState>
@@ -28,6 +29,7 @@ export default class Graph extends React.Component<{}, GraphState>
     private lastContextedEdgeId: number = -1;
     private canvasRef = React.createRef<Canvas>();
     private canvasContextMenuRef = React.createRef<CanvasContextMenu>();
+    private editLineRef = React.createRef<HTMLInputElement>();
 
     // Элемент триггера для открытия контекстного меню вручную через него.
     private contextMenuTrigger = new ContextMenuTrigger({
@@ -44,10 +46,12 @@ export default class Graph extends React.Component<{}, GraphState>
             nodesCount: 0,
             nextNodeId: 1,
             nextEdgeId: 1,
-            lastAddedEdgeId: null
+            lastAddedEdgeId: null,
+            selectedObject: null
         };
 
         this.onNodeClick = this.onNodeClick.bind(this);
+        this.onEdgeClick = this.onEdgeClick.bind(this);
         this.moveNode = this.moveNode.bind(this);
         this.setNodeText = this.setNodeText.bind(this);
         this.onEdgeCurve = this.onEdgeCurve.bind(this);
@@ -56,11 +60,13 @@ export default class Graph extends React.Component<{}, GraphState>
         this.removeLastContextedNode = this.removeLastContextedNode.bind(this);
         this.onSaveAs = this.onSaveAs.bind(this);
         this.onOpen = this.onOpen.bind(this);
+        this.onEditLineKeyDown = this.onEditLineKeyDown.bind(this);
+        this.onEditLineChange = this.onEditLineChange.bind(this);
     }
 
     render() {
         const state = this.state;
-        const edgeAdding = state.edgeAdding;
+        const {edgeAdding, selectedObject, nodes, edges } = state;
 
         return (
             <div className="app">
@@ -73,12 +79,13 @@ export default class Graph extends React.Component<{}, GraphState>
                         oriented={this.state.oriented}
                         onOrientedChange={(oriented) => this.setState({ oriented })}
                     ></SideTools>
-                    <div className="canvas">
+                    <div className="canvas graph__canvas">
                         <Canvas ref={this.canvasRef}
                             nodes={state.nodes}
                             edges={state.edges}
                             oriented={state.oriented}
                             onNodeClick={this.onNodeClick}
+                            onEdgeClick={this.onEdgeClick}
                             onNodeMove={this.moveNode}
                             onNodeTextChange={this.setNodeText}
                             onEdgeCurve={this.onEdgeCurve}
@@ -88,6 +95,17 @@ export default class Graph extends React.Component<{}, GraphState>
                                 edgeAdding ? { x: edgeAdding.x, y: edgeAdding.y } : null
                             }
                         ></Canvas>
+                        {selectedObject && <input ref={this.editLineRef}
+                            type="text" 
+                            className="graph__editline"
+                            value={selectedObject.type === 'node' ? 
+                                nodes[selectedObject.id].text : 
+                                edges[selectedObject.id].text}
+                            autoFocus={true}
+                            onBlur={() => this.setState({selectedObject: null})}
+                            onKeyDown={this.onEditLineKeyDown}
+                            onChange={this.onEditLineChange}
+                        />}
                     </div>
                     <CanvasContextMenu ref={this.canvasContextMenuRef}
                         id="canvas-contextmenu"
@@ -187,19 +205,33 @@ export default class Graph extends React.Component<{}, GraphState>
         this.state.nodes[nodeId].endEdges.map(remover);
     }
 
-    onNodeClick(id) {
-        // Клик на узле вне режима добавления ребра ничего не дает.
-        if (this.state.edgeAdding === null) return;
+    onNodeClick(id: number) {
+        if (this.state.edgeAdding) {
+            document.body.removeEventListener('mousemove', this.state.edgeAdding.mouseEventListener);
+            // Если мы в процессе добавления ребра, значит сам элемент уже был добавлен.
+            this.setState((function(this: Graph, state: GraphState) {
+                state.nodes[id].endEdges.push(state.lastAddedEdgeId);
+                state.edges[state.lastAddedEdgeId].endNodeId = id;
+                state.edgeAdding = null;
+                return state;
+            }).bind(this));
+        } else {
+            this.setState({
+                selectedObject: {
+                    type: 'node',
+                    id: id
+                }
+            });
+        }
+    }
 
-        document.body.removeEventListener('mousemove', this.state.edgeAdding.mouseEventListener);
-
-        // Если мы в процессе добавления ребра, значит сам элемент уже был добавлен.
-        this.setState((function(this: Graph, state: GraphState) {
-            state.nodes[id].endEdges.push(state.lastAddedEdgeId);
-            state.edges[state.lastAddedEdgeId].endNodeId = id;
-            state.edgeAdding = null;
-            return state;
-        }).bind(this));
+    onEdgeClick(id: number) {
+        this.setState({
+            selectedObject: {
+                type: 'edge',
+                id: id
+            }
+        });
     }
 
     setNodeText(id: number, text: string): void {
@@ -221,6 +253,30 @@ export default class Graph extends React.Component<{}, GraphState>
         this.setState(function(state, props) {
             state.edges[id].text = text;
             return state;
+        });
+    }
+
+    onEditLineKeyDown(e: React.KeyboardEvent) {
+        // Enter pressed.
+        if (e.keyCode === 13) {
+            this.setState({ selectedObject: null });
+            return;
+        }
+    }
+
+    onEditLineChange() {
+        // Edit line exist only when selectedObject exists.
+        this.setState((state) => {
+            let newState = { ...state };
+            if (state.selectedObject.type === 'node') {
+                console.log(this.editLineRef.current.value);
+                newState.nodes[state.selectedObject.id].text =
+                    this.editLineRef.current.value;
+            } else {
+                newState.edges[state.selectedObject.id].text =
+                    this.editLineRef.current.value;
+            }
+            return newState;
         });
     }
 
