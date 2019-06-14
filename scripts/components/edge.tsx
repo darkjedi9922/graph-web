@@ -2,7 +2,7 @@ import React from 'react';
 import SvgArrow from './svg-arrow';
 import EditableSvgText from './editable-svg-text';
 
-import gmath from '../libs/gmath';
+import * as gmath from '../libs/gmath';
 import { Point } from '../types';
 
 interface EdgeProps {
@@ -100,7 +100,7 @@ class Edge extends React.Component<EdgeProps, EdgeState>
         };
 
         return (
-            <g transform={"rotate(" + -degree + " " + x1 + " " + y1 + ")"} >
+            <g transform={"rotate(" + gmath.toHtmlDeg(degree) + " " + x1 + " " + y1 + ")"} >
                 <path fill="none" d={d} stroke="black" strokeWidth="2"
                     onMouseDown={this.onMouseDown}
                     onDoubleClick={this.onTextWillEdit}
@@ -108,11 +108,7 @@ class Edge extends React.Component<EdgeProps, EdgeState>
                 ></path>
                 {arrowElement}
                 <EditableSvgText text={text} rect={textRect} edit={this.state.edit}
-                    transform={`rotate(
-                        ${degree > 90 && degree < 270 ? 180 : 0} 
-                        ${textRect.x + textRect.width / 2} 
-                        ${textRect.y + 3 + textRect.height / 2}
-                    )`}
+                    parentRotate={{ deg: degree, origin: {x: x1, y: y1} }}
                     onMouseDown={this.onMouseDown}
                     onWillEdit={this.onTextWillEdit}
                     onDidEdit={this.onTextDidEdit}

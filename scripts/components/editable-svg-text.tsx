@@ -1,4 +1,6 @@
 import React from 'react';
+import { Rotate } from '../types';
+import * as gmath from '../libs/gmath';
 
 interface EditableSvgTextProps {
     rect: {
@@ -11,7 +13,7 @@ interface EditableSvgTextProps {
     edit: boolean,
     style?: object,
     className?: string,
-    transform?: string,
+    parentRotate?: Rotate,
     onMouseDown: (e: React.MouseEvent) => void,
     onMouseUp?: (e: MouseEvent) => void,
     onClick?: (e: React.MouseEvent) => void,
@@ -37,34 +39,53 @@ class EditableSvgText extends React.Component<EditableSvgTextProps> {
     }
 
     render() {
-        const rect = this.props.rect;
-        const text = this.props.text;
+        const { rect, text, parentRotate } = this.props;
+
+        let zeroRotate = null, rotateTransform = null, mirrorTransform;
+        if (parentRotate) {
+            zeroRotate = `rotate(${gmath.toHtmlDeg(-parentRotate.deg)} 
+            ${parentRotate.origin.x} ${parentRotate.origin.y})`;
+            rotateTransform = `rotate(${gmath.toHtmlDeg(parentRotate.deg)}deg)`;
+            if (parentRotate.deg > 90 && parentRotate.deg < 270) 
+                mirrorTransform = 'scale(-1, -1)'; 
+        }
 
         return (
             <foreignObject x={rect.x} y={rect.y}
-                width={rect.width} height={rect.height} 
-                transform={this.props.transform}>
-                <input defaultValue={text} ref={this.inputRef}
-                    // onDoubleClick event does not fire on disabled inputs, so
-                    // we make it read-only.
-                    readOnly={!this.props.edit}
-                    className={this.props.className}
-                    style={Object.assign({
-                        background: "transparent",
-                        border: "none",
-                        textAlign: "center",
-                        height: "100%",
-                        width: "100%",
-                        outline: "none",
-                        cursor: this.props.edit ? "auto" : "pointer"
-                    }, this.props.style)} 
-                    onDoubleClick={this.startEditing} 
-                    onBlur={this.stopEditing}
-                    onKeyDown={this.onKeyDown}
-                    onContextMenu={this.props.edit ? null : this.props.onContextMenu}
-                    onMouseDown={this.onMouseDown}
-                />
-            </foreignObject>);
+                width={rect.width} height={rect.height}
+                transform={parentRotate ? zeroRotate : null}
+            >
+                <div style={{
+                    height: "100%",
+                    width: "100%",
+                    transform: rotateTransform,
+                    transformOrigin: `0px ${parentRotate ? parentRotate.origin.y - rect.y : 0}px 0px`
+                }}>
+                    <input defaultValue={text} ref={this.inputRef}
+                        // onDoubleClick event does not fire on disabled inputs, so
+                        // we make it read-only.
+                        readOnly={!this.props.edit}
+                        className={this.props.className}
+                        style={Object.assign({
+                            background: "transparent",
+                            border: "none",
+                            textAlign: "center",
+                            height: "100%",
+                            width: "100%",
+                            outline: "none",
+                            cursor: this.props.edit ? "auto" : "pointer",
+                            transform: mirrorTransform
+                        }, this.props.style)} 
+                        onClick={this.props.onClick}
+                        onDoubleClick={this.startEditing} 
+                        onBlur={this.stopEditing}
+                        onKeyDown={this.onKeyDown}
+                        onContextMenu={this.props.edit ? null : this.props.onContextMenu}
+                        onMouseDown={this.onMouseDown}
+                    />
+                </div>
+            </foreignObject>
+        );
     }
 
     startEditing() {

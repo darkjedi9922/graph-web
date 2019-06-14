@@ -1,14 +1,6 @@
-/**
- * point.x: number
- * point.y: number
- * center.x: number
- * center.y: number
- * degree: number
- * 
- * return.x: number
- * return.y: number
- */
-function rotatePoint(point, center, degree) {
+import { Point } from "scripts/types";
+
+export function rotatePoint(point: Point, center: Point, degree: number): Point {
     const rad = 3.14 / 180 * degree;
 
     return {
@@ -19,27 +11,11 @@ function rotatePoint(point, center, degree) {
     }
 }
 
-/**
- * start.x: number
- * start.y: number
- * end.x: number
- * end.y: number
- * 
- * return number
- */
-function calcVectorLength(start, end) {
+export function calcVectorLength(start: Point, end: Point): number {
     return Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2));
 }
 
-/**
- * start.x: number
- * start.y: number
- * end.x: number
- * end.y: number
- * 
- * return number
- */
-function calcVectorDegree(start, end) {
+export function calcVectorDegree(start: Point, end: Point): number {
     // Найдем угол через угол между вектором и его проекцией на ось Х.
     const length = calcVectorLength(start, end);
     const projectionLength = end.x - start.x;
@@ -55,6 +31,10 @@ function calcVectorDegree(start, end) {
     return result;
 }
 
-exports.rotatePoint = rotatePoint;
-exports.calcVectorDegree = calcVectorDegree;
-exports.calcVectorLength = calcVectorLength;
+export function toHtmlDeg(degree: number): number {
+    return 360 - degree;
+}
+
+export function toNormalDegree(htmlDegree: number): number {
+    return 360 - htmlDegree;
+}

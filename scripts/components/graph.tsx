@@ -322,8 +322,6 @@ export default class Graph extends React.Component<{}, GraphState>
     private isState(value: object): boolean {
         const valueKeys = Object.keys(value);
         const stateKeys = Object.keys(this.state);
-        console.dir(valueKeys);
-        console.dir(stateKeys);
         return JSON.stringify(valueKeys) === JSON.stringify(stateKeys);
     }
 }

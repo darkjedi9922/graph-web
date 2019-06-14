@@ -1,5 +1,5 @@
 import React from 'react';
-import gmath from '../libs/gmath';
+import * as gmath from '../libs/gmath';
 import { Point } from 'scripts/types';
 
 interface SvgArrowProps {
