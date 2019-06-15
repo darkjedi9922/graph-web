@@ -352,7 +352,12 @@ export default class Graph extends React.Component<{}, GraphState>
 
     public onSaveAs() {
         // If saving is cancelled, savedFile is an empty.
-        const savedFile = appAPI.saveAs(JSON.stringify(this.state));
+        const savedFile = appAPI.saveAs(JSON.stringify({
+            ...this.state,
+            // Добавим идентификатор нашего формата, чтобы проверять его при открытии
+            // файла (вдруг нам подсунули не то).
+            stateId: 'graphstate'
+        }));
     }
 
     public onOpen() {
@@ -375,8 +380,6 @@ export default class Graph extends React.Component<{}, GraphState>
     }
 
     private isState(value: object): boolean {
-        const valueKeys = Object.keys(value);
-        const stateKeys = Object.keys(this.state);
-        return JSON.stringify(valueKeys) === JSON.stringify(stateKeys);
+        return value['stateId'] === 'graphstate';
     }
 }
