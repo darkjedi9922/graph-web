@@ -1,6 +1,6 @@
 import React from 'react';
 import SvgArrow from './svg-arrow';
-
+import ClickEngine from '../engines/click-engine';
 import * as gmath from '../libs/gmath';
 import { Point } from '../types';
 
@@ -24,7 +24,8 @@ class Edge extends React.Component<EdgeProps>
         startY: number,
         planeStart: Point,
         startCurve: number
-    } | null = null;
+    } = null;
+    private clickEngine = new ClickEngine;
 
     constructor(props) {
         super(props);
@@ -78,7 +79,6 @@ class Edge extends React.Component<EdgeProps>
             const arrowStart = virtualPath.getPointAtLength(pathLength - nodeRadius - arrowSize);
             arrowElement = <SvgArrow vector={{start: arrowStart, end: arrowEnd}}
                 size={arrowSize}
-                onClick={this.props.onClick}
                 onMouseDown={this.onMouseDown}
                 onContextMenu={this.props.onContextMenu}
             />
@@ -97,7 +97,6 @@ class Edge extends React.Component<EdgeProps>
             <g transform={"rotate(" + gmath.toHtmlDeg(degree) + " " + x1 + " " + y1 + ")"} >
                 <path fill="none" d={d} stroke="black" strokeWidth="2"
                     onMouseDown={this.onMouseDown}
-                    onClick={this.props.onClick}
                     onContextMenu={this.props.onContextMenu}
                 ></path>
                 {arrowElement}
@@ -105,9 +104,6 @@ class Edge extends React.Component<EdgeProps>
                     style={{ userSelect: "none" }}
                     textAnchor="middle" alignmentBaseline="central"
                     transform={mirrorTransform}
-                    onClick={() => {
-                        if (!this.curving) this.props.onClick();
-                    }}
                     onMouseDown={this.onMouseDown}
                     onContextMenu={this.props.onContextMenu}
                 >
@@ -126,6 +122,8 @@ class Edge extends React.Component<EdgeProps>
     }
 
     onMouseDown(e: React.MouseEvent) {
+        this.clickEngine.onMouseDown(e.nativeEvent);
+
         const start = this.props.start;
         const eventX = e.clientX;
         const eventY = e.clientY;
@@ -154,7 +152,9 @@ class Edge extends React.Component<EdgeProps>
         this.props.onCurve(this.curving.startCurve + curve);
     }
 
-    onMouseUp(event) {
+    onMouseUp(e: MouseEvent) {
+        this.clickEngine.onMouseUp(e, this.props.onClick);
+
         document.body.removeEventListener('mousemove', this.onMouseMove);
         document.body.removeEventListener('mouseup', this.onMouseUp);
         this.curving = null;

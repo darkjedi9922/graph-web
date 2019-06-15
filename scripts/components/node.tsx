@@ -1,4 +1,5 @@
 import React from 'react';
+import ClickEngine from '../engines/click-engine';
 
 interface NodeProps {
     id: number,
@@ -7,7 +8,7 @@ interface NodeProps {
     cy: number,
     text: string,
     className: string,
-    onClick: (e: React.MouseEvent) => void,
+    onClick: (e: MouseEvent) => void,
     onMove: (x: number, y: number) => void,
     onContextMenu: (e: React.MouseEvent) => void,
     onTextChange: (text: string) => void
@@ -20,7 +21,8 @@ class Node extends React.Component<NodeProps> {
         cursorStartX: number,
         cursorStartY: number,
         listener: (e: MouseEvent) => void
-    } | null = null;
+    } = null;
+    private clickEngine = new ClickEngine;
     
     constructor(props) {
         super(props);
@@ -44,9 +46,6 @@ class Node extends React.Component<NodeProps> {
             <g>
                 <circle r={radius} cx={centerX} cy={centerY} 
                     className={this.props.className}
-                    onClick={(e) => {
-                        if (!this.moving) this.props.onClick(e);
-                    }}
                     onMouseDown={this.onMouseDown.bind(this)}
                     onMouseUp={this.onMouseUp.bind(this)}
                     onContextMenu={this.props.onContextMenu}
@@ -55,9 +54,6 @@ class Node extends React.Component<NodeProps> {
                     className="graph__node-text"
                     style={{ userSelect: "none" }}
                     textAnchor="middle" alignmentBaseline="central"
-                    onClick={(e) => {
-                        if (!this.moving) this.props.onClick(e);
-                    }}
                     onMouseDown={this.onMouseDown.bind(this)}
                     onMouseUp={this.onMouseUp.bind(this)}
                     onContextMenu={this.props.onContextMenu}
@@ -68,7 +64,9 @@ class Node extends React.Component<NodeProps> {
         );
     }
 
-    onMouseDown(event) {
+    onMouseDown(e: React.MouseEvent) {
+        this.clickEngine.onMouseDown(e.nativeEvent);
+
         // Мы будем говорить о "желании" переместиться через коллбек. Если коллбека
         // нет, то и пытаться понять куда мы хотим перемещаться бессмысленно. 
         if (!this.props.onMove) return;
@@ -76,8 +74,8 @@ class Node extends React.Component<NodeProps> {
         this.moving = {
             startX: this.props.cx,
             startY: this.props.cy,
-            cursorStartX: event.clientX,
-            cursorStartY: event.clientY,
+            cursorStartX: e.clientX,
+            cursorStartY: e.clientY,
             listener: (function (e) {
                 // Почему-то обработчик события все еще пытается сработать иногда,
                 // не смотря на то, что он уже как-бы удален...
@@ -94,7 +92,9 @@ class Node extends React.Component<NodeProps> {
         document.body.addEventListener("mousemove", this.moving.listener);
     }
 
-    onMouseUp() {
+    onMouseUp(e: React.MouseEvent) {
+        this.clickEngine.onMouseUp(e.nativeEvent, this.props.onClick);
+
         if (!this.moving) return;
         document.body.removeEventListener('mousemove', this.moving.listener);
         this.moving = null;

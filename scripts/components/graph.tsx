@@ -269,7 +269,6 @@ export default class Graph extends React.Component<{}, GraphState>
         this.setState((state) => {
             let newState = { ...state };
             if (state.selectedObject.type === 'node') {
-                console.log(this.editLineRef.current.value);
                 newState.nodes[state.selectedObject.id].text =
                     this.editLineRef.current.value;
             } else {
