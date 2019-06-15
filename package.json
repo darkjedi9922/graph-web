@@ -7,6 +7,7 @@
     "webpack": "cross-env NODE_DEV=true webpack",
     "webpack-watch": "cross-env NODE_DEV=true webpack --watch",
     "start": "cross-env NODE_DEV=true electron .",
+    "prebuild": "cross-env NODE_DEV=false webpack",
     "build-win32": "electron-packager . Graph --platform=win32 --arch=ia32 --electron-version=3.1.1 --app-version=1.0.0 --out=build --ignore=build --ignore=node_modules --ignore=scripts --ignore=styles --overwrite",
     "build-linux": "electron-packager . Graph --platform=linux --arch=ia32 --electron-version=3.1.1 --app-version=1.0.0 --out=build --ignore=build --ignore=node_modules --ignore=scripts --ignore=styles --overwrite"
   },

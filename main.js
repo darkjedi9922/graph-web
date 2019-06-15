@@ -11,7 +11,7 @@ var reactDevTools = null;
 
 app.on('ready', function () {
     // Так как используем React, установим react-dev-tools.
-    if (process.env.NODE_DEV) {
+    if (process.env.NODE_DEV === 'true') {
         const {
             default: installExtension,
             REACT_DEVELOPER_TOOLS

@@ -13,10 +13,13 @@ function globs(entries) {
     return result;
 }
 
+const mode = process.env.NODE_DEV === 'true' ? 'development' : 'production';
+console.log('Webpack build in ' + mode + ' mode.');
+
 module.exports = {
     context: __dirname,
     target: 'electron-main',
-    mode: process.env.NODE_DEV ? 'development' : 'production',
+    mode: mode,
     devtool: "source-map",
     entry: {
         'main.css': ['./styles/main.scss'],
