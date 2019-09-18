@@ -1,4 +1,6 @@
 import React from 'react';
+import { Dispatch } from 'redux';
+import { connect } from 'react-redux';
 import Canvas from './canvas';
 import CanvasContextMenu from './canvas-context-menu';
 import { ContextMenuTrigger } from 'react-contextmenu';
@@ -6,6 +8,7 @@ import { NodeMap, EdgeMap, NodeModel } from '../types';
 import SideTools from './sidetools';
 import Menu from './menu';
 import * as appAPI from '../desktop';
+import { SET_ORIENTED } from '../store';
 
 interface CanvasData {
     nodes: NodeMap,
@@ -29,7 +32,11 @@ interface GraphState {
     selectedObject: { type: 'node' | 'edge', id: number }
 }
 
-export default class Graph extends React.Component<{}, GraphState>
+interface DispatchProps {
+    setOriented: (oriented: boolean) => void
+}
+
+class Graph extends React.Component<DispatchProps, GraphState>
 {
     private lastContextedNodeId: number = -1;
     private lastContextedEdgeId: number = -1;
@@ -88,7 +95,6 @@ export default class Graph extends React.Component<{}, GraphState>
                 ></Menu>
                 <div className="app__graph graph">
                     <SideTools
-                        oriented={oriented}
                         onOrientedChange={this.setOriented}
                     ></SideTools>
                     <div className="canvas graph__canvas">
@@ -142,6 +148,8 @@ export default class Graph extends React.Component<{}, GraphState>
                 }
             }
         }));
+
+        this.props.setOriented(oriented);
     }
 
     onAddNodeClick(e) {
@@ -424,3 +432,12 @@ export default class Graph extends React.Component<{}, GraphState>
         return value['stateId'] === 'graphstate';
     }
 }
+
+const mapDispatchToProps = (dispatch: Dispatch, ownProps) => ({
+    setOriented: (oriented: boolean) => dispatch({
+        type: SET_ORIENTED,
+        oriented
+    })
+})
+
+export default connect(null, mapDispatchToProps)(Graph);
