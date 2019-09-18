@@ -7,17 +7,24 @@ import SideTools from './sidetools';
 import Menu from './menu';
 import * as appAPI from '../desktop';
 
-interface GraphState {
+interface CanvasData {
     nodes: NodeMap,
     edges: EdgeMap,
     oriented: boolean,
+    nextNodeId: number,
+    nextEdgeId: number
+}
+
+interface GraphState {
+    project: {
+        file?: string,
+        data: CanvasData // this is what will be saved in the project file.
+    },
     edgeAdding: null | {
         x: number,
         y: number,
         mouseEventListener: (e: MouseEvent) => void
     },
-    nextNodeId: number,
-    nextEdgeId: number,
     lastAddedEdgeId: number,
     selectedObject: { type: 'node' | 'edge', id: number }
 }
@@ -38,16 +45,22 @@ export default class Graph extends React.Component<{}, GraphState>
     constructor(props) {
         super(props);
         this.state = {
-            nodes: {},
-            edges: {},
-            oriented: false,
+            project: {
+                file: null,
+                data: {
+                    nodes: {},
+                    edges: {},
+                    oriented: false,
+                    nextNodeId: 1,
+                    nextEdgeId: 1,
+                }
+            },
             edgeAdding: null,
-            nextNodeId: 1,
-            nextEdgeId: 1,
             lastAddedEdgeId: null,
             selectedObject: null
         };
 
+        this.setOriented = this.setOriented.bind(this);
         this.onNodeClick = this.onNodeClick.bind(this);
         this.onEdgeClick = this.onEdgeClick.bind(this);
         this.moveNode = this.moveNode.bind(this);
@@ -64,7 +77,8 @@ export default class Graph extends React.Component<{}, GraphState>
 
     render() {
         const state = this.state;
-        const {edgeAdding, selectedObject, nodes, edges } = state;
+        const { edgeAdding, selectedObject } = state;
+        const { nodes, edges, oriented } = state.project.data;
 
         return (
             <div className="app">
@@ -74,14 +88,14 @@ export default class Graph extends React.Component<{}, GraphState>
                 ></Menu>
                 <div className="app__graph graph">
                     <SideTools
-                        oriented={this.state.oriented}
-                        onOrientedChange={(oriented) => this.setState({ oriented })}
+                        oriented={oriented}
+                        onOrientedChange={this.setOriented}
                     ></SideTools>
                     <div className="canvas graph__canvas">
                         <Canvas ref={this.canvasRef}
-                            nodes={state.nodes}
-                            edges={state.edges}
-                            oriented={state.oriented}
+                            nodes={nodes}
+                            edges={edges}
+                            oriented={oriented}
                             onNodeClick={this.onNodeClick}
                             onEdgeClick={this.onEdgeClick}
                             onNodeMove={this.moveNode}
@@ -118,6 +132,18 @@ export default class Graph extends React.Component<{}, GraphState>
         );
     }
 
+    setOriented(oriented: boolean) {
+        this.setState((state) => ({
+            project: {
+                ...state.project,
+                data: {
+                    ...state.project.data,
+                    oriented
+                }
+            }
+        }));
+    }
+
     onAddNodeClick(e) {
         const canvasPos = this.canvasRef.current.getCoords();
         this.addNode({
@@ -149,8 +175,8 @@ export default class Graph extends React.Component<{}, GraphState>
 
         this.setState(((state: GraphState) => {
             state.edgeAdding = {
-                x: state.nodes[this.lastContextedNodeId].x,
-                y: state.nodes[this.lastContextedNodeId].y,
+                x: state.project.data.nodes[this.lastContextedNodeId].x,
+                y: state.project.data.nodes[this.lastContextedNodeId].y,
                 mouseEventListener: mouseEventListener
             };
             return state;
@@ -164,33 +190,45 @@ export default class Graph extends React.Component<{}, GraphState>
         if (nodeId === null) return;
         this.removeNodeEdges(nodeId);
         this.setState((state) => ({
-            nodes: (() => {
-                let newNodes = {...state.nodes};
-                delete newNodes[nodeId];
-                return newNodes;
-            })(),
+            project: {
+                ...state.project,
+                data: {
+                    ...state.project.data,
+                    nodes: (() => {
+                        let newNodes = { ...state.project.data.nodes };
+                        delete newNodes[nodeId];
+                        return newNodes;
+                    })()
+                }
+            }
         }));
     }
 
     public removeEdge(id: number): void {
         this.setState((state) => ({
-            edges: (() => {
-                let newEdges = {...state.edges};
-                delete newEdges[id];
-                return newEdges;
-            })(),
-            nodes: (() => {
-                let newNodes: NodeMap = {...state.nodes};
-                let startNode: NodeModel = newNodes[state.edges[id].startNodeId];
-                let endNode: NodeModel = newNodes[state.edges[id].endNodeId];
+            project: {
+                ...state.project,
+                data: {
+                    ...state.project.data,
+                    edges: (() => {
+                        let newEdges = { ...state.project.data.edges };
+                        delete newEdges[id];
+                        return newEdges;
+                    })(),
+                    nodes: (() => {
+                        let newNodes: NodeMap = { ...state.project.data.nodes };
+                        let startNode: NodeModel = newNodes[state.project.data.edges[id].startNodeId];
+                        let endNode: NodeModel = newNodes[state.project.data.edges[id].endNodeId];
 
-                // Удаляем это ребро из его начального и конечного узла.
-                const filter = edgeId => edgeId !== id;
-                startNode.startEdges = startNode.startEdges.filter(filter);
-                endNode.endEdges = endNode.endEdges.filter(filter);
+                        // Удаляем это ребро из его начального и конечного узла.
+                        const filter = edgeId => edgeId !== id;
+                        startNode.startEdges = startNode.startEdges.filter(filter);
+                        endNode.endEdges = endNode.endEdges.filter(filter);
 
-                return newNodes;
-            })()
+                        return newNodes;
+                    })()
+                }
+            }
         }))
     }
 
@@ -198,8 +236,8 @@ export default class Graph extends React.Component<{}, GraphState>
         const remover = (edgeId) => {
             this.removeEdge(edgeId);
         };
-        this.state.nodes[nodeId].startEdges.map(remover);
-        this.state.nodes[nodeId].endEdges.map(remover);
+        this.state.project.data.nodes[nodeId].startEdges.map(remover);
+        this.state.project.data.nodes[nodeId].endEdges.map(remover);
     }
 
     onNodeClick(id: number) {
@@ -207,8 +245,8 @@ export default class Graph extends React.Component<{}, GraphState>
             document.body.removeEventListener('mousemove', this.state.edgeAdding.mouseEventListener);
             // Если мы в процессе добавления ребра, значит сам элемент уже был добавлен.
             this.setState((function(this: Graph, state: GraphState) {
-                state.nodes[id].endEdges.push(state.lastAddedEdgeId);
-                state.edges[state.lastAddedEdgeId].endNodeId = id;
+                state.project.data.nodes[id].endEdges.push(state.lastAddedEdgeId);
+                state.project.data.edges[state.lastAddedEdgeId].endNodeId = id;
                 state.edgeAdding = null;
                 return state;
             }).bind(this));
@@ -234,21 +272,21 @@ export default class Graph extends React.Component<{}, GraphState>
     setNodeText(id: number, text: string): void {
         this.setState((state) => {
             let newState = {...state}
-            newState.nodes[id].text = text;
+            newState.project.data.nodes[id].text = text;
             return newState;
         });
     }
 
     onEdgeCurve(id, curve) {
         this.setState(function(state, props) {
-            state.edges[id].curve = curve;
+            state.project.data.edges[id].curve = curve;
             return state;
         })
     }
 
     onEdgeTextChange(id, text) {
         this.setState(function(state, props) {
-            state.edges[id].text = text;
+            state.project.data.edges[id].text = text;
             return state;
         });
     }
@@ -266,10 +304,10 @@ export default class Graph extends React.Component<{}, GraphState>
         this.setState((state) => {
             let newState = { ...state };
             if (state.selectedObject.type === 'node') {
-                newState.nodes[state.selectedObject.id].text =
+                newState.project.data.nodes[state.selectedObject.id].text =
                     this.editLineRef.current.value;
             } else {
-                newState.edges[state.selectedObject.id].text =
+                newState.project.data.edges[state.selectedObject.id].text =
                     this.editLineRef.current.value;
             }
             return newState;
@@ -278,8 +316,8 @@ export default class Graph extends React.Component<{}, GraphState>
 
     moveNode(id, cx, cy) {
         this.setState((function(state, props) {
-            state.nodes[id].x = cx;
-            state.nodes[id].y = cy;
+            state.project.data.nodes[id].x = cx;
+            state.project.data.nodes[id].y = cy;
             return state;
         }).bind(this));
     }
@@ -289,20 +327,26 @@ export default class Graph extends React.Component<{}, GraphState>
      * options.pos.y
      */
     addNode(options) {
-        this.setState((state, props) => ({
-            nodes: (function (this: Graph) {
-                state.nodes[state.nextNodeId] = {
-                    id: state.nextNodeId,
-                    text: state.nextNodeId.toString(),
-                    radius: 25,
-                    x: options.pos.x,
-                    y: options.pos.y,
-                    startEdges: [],
-                    endEdges: []
-                };
-                return state.nodes;
-            }).bind(this)(),
-            nextNodeId: state.nextNodeId + 1
+        this.setState((state) => ({
+            project: {
+                ...state.project,
+                data: {
+                    ...state.project.data,
+                    nodes: (function (this: Graph) {
+                        state.project.data.nodes[state.project.data.nextNodeId] = {
+                            id: state.project.data.nextNodeId,
+                            text: state.project.data.nextNodeId.toString(),
+                            radius: 25,
+                            x: options.pos.x,
+                            y: options.pos.y,
+                            startEdges: [],
+                            endEdges: []
+                        };
+                        return state.project.data.nodes;
+                    }).bind(this)(),
+                    nextNodeId: state.project.data.nextNodeId + 1
+                }
+            }
         }));
     }
 
@@ -313,7 +357,7 @@ export default class Graph extends React.Component<{}, GraphState>
         if (startNodeId === endNodeId) return;
 
         this.setState((function(state: GraphState) {
-            const newEdgeId = state.nextEdgeId;
+            const newEdgeId = state.project.data.nextEdgeId;
             const newEdge = {
                 startNodeId: startNodeId,
                 endNodeId: endNodeId,
@@ -321,11 +365,11 @@ export default class Graph extends React.Component<{}, GraphState>
                 curve: 0
             }
             
-            state.edges[newEdgeId] = newEdge;
-            state.nodes[startNodeId].startEdges.push(newEdgeId);
-            if (endNodeId !== null) state.nodes[endNodeId].endEdges.push(newEdgeId);
+            state.project.data.edges[newEdgeId] = newEdge;
+            state.project.data.nodes[startNodeId].startEdges.push(newEdgeId);
+            if (endNodeId !== null) state.project.data.nodes[endNodeId].endEdges.push(newEdgeId);
 
-            state.nextEdgeId += 1;
+            state.project.data.nextEdgeId += 1;
             state.lastAddedEdgeId = newEdgeId;
 
             return state;
@@ -345,7 +389,7 @@ export default class Graph extends React.Component<{}, GraphState>
     public onSaveAs() {
         // If saving is cancelled, savedFile is an empty.
         const savedFile = appAPI.saveAs(JSON.stringify({
-            ...this.state,
+            ...this.state.project.data,
             // Добавим идентификатор нашего формата, чтобы проверять его при открытии
             // файла (вдруг нам подсунули не то).
             stateId: 'graphstate'
@@ -361,11 +405,16 @@ export default class Graph extends React.Component<{}, GraphState>
         // Мог быть выбран файл неправильного формата.
         try {
             // Parse can throw an error.
-            const parsed = JSON.parse(contents) as object;
+            const parsed = JSON.parse(contents) as CanvasData;
             // We must be sure that the parsed object is a graph state.
             if (!this.isState(parsed)) throw 'The object is not a graph state.';
             // Further everything is ok.
-            this.setState(parsed);
+            this.setState((state) => ({
+                project: {
+                    ...state.project,
+                    data: parsed
+                }
+            }));
         } catch (e) {
             console.error(e);
         }
