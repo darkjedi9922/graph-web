@@ -16,7 +16,6 @@ interface GraphState {
         y: number,
         mouseEventListener: (e: MouseEvent) => void
     },
-    nodesCount: number,
     nextNodeId: number,
     nextEdgeId: number,
     lastAddedEdgeId: number,
@@ -43,7 +42,6 @@ export default class Graph extends React.Component<{}, GraphState>
             edges: {},
             oriented: false,
             edgeAdding: null,
-            nodesCount: 0,
             nextNodeId: 1,
             nextEdgeId: 1,
             lastAddedEdgeId: null,
@@ -171,7 +169,6 @@ export default class Graph extends React.Component<{}, GraphState>
                 delete newNodes[nodeId];
                 return newNodes;
             })(),
-            nodesCount: state.nodesCount - 1
         }));
     }
 
@@ -309,7 +306,6 @@ export default class Graph extends React.Component<{}, GraphState>
                 };
                 return state.nodes;
             }).bind(this)(),
-            nodesCount: state.nodesCount + 1,
             nextNodeId: state.nextNodeId + 1
         }));
     }
@@ -343,7 +339,7 @@ export default class Graph extends React.Component<{}, GraphState>
     onCanvasContextMenu(e, nodeId: number, edgeId: number): void {
         (this.contextMenuTrigger as any).handleContextClick(e);
         const contextMenu = this.canvasContextMenuRef.current
-        contextMenu.enableAddEdge(this.state.nodesCount > 1 && nodeId !== -1)
+        contextMenu.enableAddEdge(Object.keys(this.state.project.data.nodes).length > 1 && nodeId !== -1)
         contextMenu.enableRemoveNode(nodeId !== -1);
         contextMenu.enableRemoveEdge(edgeId !== -1);
         this.lastContextedNodeId = nodeId;
