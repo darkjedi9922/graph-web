@@ -276,10 +276,6 @@ export default class Graph extends React.Component<{}, GraphState>
         });
     }
 
-    toggleArrowEdges() {
-        this.setState((state, props) => ({ oriented: !state.oriented }));
-    }
-
     moveNode(id, cx, cy) {
         this.setState((function(state, props) {
             state.nodes[id].x = cx;
