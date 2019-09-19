@@ -27,3 +27,8 @@ export interface Rotate {
     deg: number,
     origin: Point
 }
+
+export interface AbstractCanvasObject {
+    type: 'node' | 'edge',
+    id: number
+}

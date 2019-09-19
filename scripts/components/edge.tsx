@@ -13,7 +13,6 @@ interface EdgeProps {
     arrow: boolean,
     onClick: () => void,
     onCurve: (curve) => void
-    onTextChange: (text) => void,
     onContextMenu: (e: React.MouseEvent) => void
 }
 
