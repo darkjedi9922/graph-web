@@ -4,10 +4,9 @@ import { connect } from 'react-redux';
 import Canvas from './canvas';
 import CanvasContextMenu from './canvas-context-menu';
 import { ContextMenuTrigger } from 'react-contextmenu';
-import { NodeMap, EdgeMap, NodeModel, Point, AbstractCanvasObject } from '../types';
+import { NodeMap, EdgeMap, Point, AbstractCanvasObject } from '../types';
 import SideTools from './sidetools';
 import Menu from './menu';
-import * as appAPI from '../desktop';
 import {
     AppState,
     SET_ORIENTED, 
@@ -21,7 +20,8 @@ import {
     CURVE_EDGE,
     SET_NODE_TEXT,
     SET_EDGE_TEXT,
-    LOAD_DATA
+    OPEN_PROJECT,
+    SAVE_PROJECT_AS,
 } from '../store';
 
 interface GraphState {
@@ -36,9 +36,7 @@ interface StoreProps {
     nodes: NodeMap,
     edges: EdgeMap,
     oriented: boolean,
-    nextNodeId: number,
     nextEdgeId: number,
-    saveData: object,
     selectedObject?: AbstractCanvasObject
 }
 
@@ -47,8 +45,9 @@ interface DispatchProps {
     addEdge: (startNodeId: number, endNodeId?: number) => void,
     curveEdge: (id: number, curve: number) => void,
     endEdge: (edgeId: number, endNodeId: number) => void,
-    loadData: (data: object) => void,
     moveNode: (id: number, pos: Point) => void,
+    openProject: () => void,
+    saveProjectAs: () => void,
     setNodeText: (id: number, text: string) => void,
     setEdgeText: (id: number, text: string) => void,
     selectObject: (object?: AbstractCanvasObject) => void,
@@ -81,8 +80,6 @@ class Graph extends React.Component<StoreProps & DispatchProps, GraphState>
         this.moveNode = this.moveNode.bind(this);
         this.onCanvasContextMenu = this.onCanvasContextMenu.bind(this);
         this.removeLastContextedNode = this.removeLastContextedNode.bind(this);
-        this.onSaveAs = this.onSaveAs.bind(this);
-        this.onOpen = this.onOpen.bind(this);
         this.onEditLineKeyDown = this.onEditLineKeyDown.bind(this);
         this.onEditLineChange = this.onEditLineChange.bind(this);
     }
@@ -95,8 +92,8 @@ class Graph extends React.Component<StoreProps & DispatchProps, GraphState>
         return (
             <div className="app">
                 <Menu
-                    onOpen={this.onOpen}
-                    onFileSaveAs={this.onSaveAs}
+                    onOpen={this.props.openProject}
+                    onFileSaveAs={this.props.saveProjectAs}
                 ></Menu>
                 <div className="app__graph graph">
                     <SideTools
@@ -238,48 +235,13 @@ class Graph extends React.Component<StoreProps & DispatchProps, GraphState>
         this.lastContextedNodeId = nodeId;
         this.lastContextedEdgeId = edgeId;
     }
-
-    public onSaveAs() {
-        // If saving is cancelled, savedFile is an empty.
-        const savedFile = appAPI.saveAs(JSON.stringify({
-            ...this.props.saveData,
-            // Добавим идентификатор нашего формата, чтобы проверять его при открытии
-            // файла (вдруг нам подсунули не то).
-            stateId: 'graphstate'
-        }));
-    }
-
-    public onOpen() {
-        const contents = appAPI.open();
-        
-        // If opening is cancelled, contents is an empty. 
-        if (!contents) return;
-        
-        // Мог быть выбран файл неправильного формата.
-        try {
-            // Parse can throw an error.
-            const parsed = JSON.parse(contents);
-            // We must be sure that the parsed object is a graph state.
-            if (!this.isState(parsed)) throw 'The object is not a graph state.';
-            // Further everything is ok.
-            this.props.loadData(parsed);
-        } catch (e) {
-            console.error(e);
-        }
-    }
-
-    private isState(value: object): boolean {
-        return value['stateId'] === 'graphstate';
-    }
 }
 
 const mapStateToProps = (state: AppState) => ({
     nodes: state.project.data.nodes,
     edges: state.project.data.edges,
     oriented: state.project.data.oriented,
-    nextNodeId: state.project.data.nextNodeId,
     nextEdgeId: state.project.data.nextEdgeId,
-    saveData: state.project.data,
     selectedObject: state.selectedObject
 } as StoreProps)
 
@@ -288,8 +250,9 @@ const mapDispatchToProps = (dispatch: Dispatch, ownProps) => ({
     addEdge: (startNodeId, endNodeId) => dispatch({ type: ADD_EDGE, startNodeId, endNodeId }),
     curveEdge: (id, curve) => dispatch({ type: CURVE_EDGE, id, curve }),
     endEdge: (edgeId, endNodeId) => dispatch({ type: END_EDGE, edgeId, endNodeId }),
-    loadData: (data) => dispatch({ type: LOAD_DATA, data }),
     moveNode: (id, pos) => dispatch({ type: MOVE_NODE, id, pos }),
+    openProject: () => dispatch({ type: OPEN_PROJECT }),
+    saveProjectAs: () => dispatch({ type: SAVE_PROJECT_AS }),
     selectObject: (object) => dispatch({ type: SELECT_OBJECT, object }),
     setNodeText: (id, text) => dispatch({ type: SET_NODE_TEXT, id, text }),
     setEdgeText: (id, text) => dispatch({ type: SET_EDGE_TEXT, id, text }),

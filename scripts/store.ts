@@ -1,5 +1,6 @@
 import { createStore } from 'redux'
 import { AbstractCanvasObject, NodeMap, EdgeMap } from './types';
+import * as appAPI from './desktop';
 
 export interface AppState {
     project: {
@@ -19,8 +20,9 @@ export const ADD_NODE = 'ADD_NODE';
 export const ADD_EDGE = 'ADD_EDGE';
 export const CURVE_EDGE = 'CURVE_EDGE';
 export const END_EDGE = 'END_EDGE';
-export const LOAD_DATA = 'LOAD_DATA';
 export const MOVE_NODE = 'MOVE_NODE';
+export const OPEN_PROJECT = 'OPEN_PROJECT';
+export const SAVE_PROJECT_AS = 'SAVE_PROJECT';
 export const SELECT_OBJECT = 'SELECT_OBJECT';
 export const SET_NODE_TEXT = 'SET_NODE_TEXT';
 export const SET_EDGE_TEXT = 'SET_EDGE_TEXT';
@@ -92,14 +94,38 @@ const appReducer = function(state = initialState, action): AppState {
             newState.project.data.nodes = nodes;
             newState.project.data.edges = edges;
             break;
-        case LOAD_DATA:
-            newState.project.data = action.data;
-            break;
         case MOVE_NODE:
             var nodes = { ...state.project.data.nodes };
             nodes[action.id].x = action.pos.x;
             nodes[action.id].y = action.pos.y;
             newState.project.data.nodes = nodes;
+            break;
+        case OPEN_PROJECT:
+            const contents = appAPI.open();
+
+            // If opening is cancelled, contents is an empty. 
+            if (!contents) return;
+
+            // Мог быть выбран файл неправильного формата.
+            try {
+                // Parse can throw an error.
+                const parsed = JSON.parse(contents);
+                // We must be sure that the parsed object is a graph state.
+                if (!isProjectData(parsed)) throw 'The object is not a graph state.';
+                // Further everything is ok.
+                newState.project.data = parsed;
+            } catch (e) {
+                console.error(e);
+            }
+            break;
+        case SAVE_PROJECT_AS:
+            // If saving is cancelled, savedFile is an empty.
+            const savedFile = appAPI.saveAs(JSON.stringify({
+                ...state.project.data,
+                // Добавим идентификатор нашего формата, чтобы проверять его при 
+                // открытии файла (вдруг нам подсунули не то).
+                stateId: 'graphstate'
+            }));
             break;
         case SELECT_OBJECT:
             newState.selectedObject = action.object;
@@ -162,6 +188,10 @@ function removeEdge(nodes: NodeMap, edges: EdgeMap, id: number): {
 
     delete resultEdges[id];
     return { nodes: resultNodes, edges: resultEdges };
+}
+
+function isProjectData(value: object): boolean {
+    return value['stateId'] === 'graphstate';
 }
 
 const store = createStore(appReducer);
