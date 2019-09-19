@@ -155,30 +155,24 @@ class Graph extends React.Component<StoreProps & DispatchProps, GraphState>
         if (this.lastContextedNodeId === -1) return;
         this.props.addEdge(this.lastContextedNodeId, null);
 
-        const graph = this;
         const canvasPos = this.canvasRef.current.getCoords();
         const mouseEventListener = (e) => {
-            
-            graph.setState((state) => {
-                return Object.assign({}, state, {
-                    edgeAdding: {
-                        x: e.clientX - canvasPos.x,
-                        y: e.clientY - canvasPos.y,
-                        mouseEventListener: mouseEventListener
-                    }
-                })
+            this.setState({
+                edgeAdding: {
+                    x: e.clientX - canvasPos.x,
+                    y: e.clientY - canvasPos.y,
+                    mouseEventListener: mouseEventListener
+                }
             });
         };
 
-        this.setState((state, props) => {
-            let newState = {...state};
-            newState.edgeAdding = {
+        this.setState((state, props) => ({
+            edgeAdding: {
                 x: props.nodes[this.lastContextedNodeId].x,
                 y: props.nodes[this.lastContextedNodeId].y,
                 mouseEventListener: mouseEventListener
-            };
-            return newState;
-        });
+            }
+        }));
 
         document.body.addEventListener('mousemove', mouseEventListener);
     }
@@ -198,17 +192,9 @@ class Graph extends React.Component<StoreProps & DispatchProps, GraphState>
             // значит сам элемент уже был добавлен.
             let lastAddedEdgeId = this.props.nextEdgeId - 1;
             this.props.endEdge(lastAddedEdgeId, id);
-
-            this.setState((state) => {
-                let newState = {...state};
-                newState.edgeAdding = null;
-                return newState;
-            });
+            this.setState({ edgeAdding: null });
         } else {
-            this.props.selectObject({
-                type: 'node',
-                id
-            });
+            this.props.selectObject({ type: 'node', id });
         }
     }
 
