@@ -48,7 +48,8 @@ const appReducer = function(state = initialState, action): AppState {
     let newState = {...state};
     switch (action.type) {
         case ADD_NODE:
-            newState.project.data.nodes[state.project.data.nextNodeId] = {
+            var nodes = { ...state.project.data.nodes };
+            nodes[state.project.data.nextNodeId] = {
                 id: state.project.data.nextNodeId,
                 text: state.project.data.nextNodeId.toString(),
                 radius: 25,
@@ -57,6 +58,7 @@ const appReducer = function(state = initialState, action): AppState {
                 startEdges: [],
                 endEdges: []
             };
+            newState.project.data.nodes = nodes;
             newState.project.data.nextNodeId += 1;
             break;
         case ADD_EDGE:
