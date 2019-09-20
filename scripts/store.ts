@@ -32,6 +32,7 @@ export const REMOVE_EDGE = 'REMOVE_EDGE';
 
 const initialState: AppState = {
     project: {
+        file: null,
         data: {
             nodes: {},
             edges: {},
@@ -101,18 +102,19 @@ const appReducer = function(state = initialState, action): AppState {
             newState.project.data.nodes = nodes;
             break;
         case OPEN_PROJECT:
-            const contents = appAPI.open();
+            const openResult = appAPI.open();
 
             // If opening is cancelled, contents is an empty. 
-            if (!contents) return;
+            if (!openResult) return;
 
             // Мог быть выбран файл неправильного формата.
             try {
                 // Parse can throw an error.
-                const parsed = JSON.parse(contents);
+                const parsed = JSON.parse(openResult.contents);
                 // We must be sure that the parsed object is a graph state.
                 if (!isProjectData(parsed)) throw 'The object is not a graph state.';
                 // Further everything is ok.
+                newState.project.file = openResult.file;
                 newState.project.data = parsed;
             } catch (e) {
                 console.error(e);
@@ -120,7 +122,7 @@ const appReducer = function(state = initialState, action): AppState {
             break;
         case SAVE_PROJECT_AS:
             // If saving is cancelled, savedFile is an empty.
-            const savedFile = appAPI.saveAs(JSON.stringify({
+            newState.project.file = appAPI.saveAs(JSON.stringify({
                 ...state.project.data,
                 // Добавим идентификатор нашего формата, чтобы проверять его при 
                 // открытии файла (вдруг нам подсунули не то).

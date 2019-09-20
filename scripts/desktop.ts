@@ -24,9 +24,12 @@ export function saveAs(contents: string): string {
 }
 
 /**
- * If opening was cancelled, returns an empty string.
+ * If opening was cancelled, returns null.
  */
-export function open(): string {
+export function open(): {
+    file: string,
+    contents: string
+} | null {
     const files = dialog.showOpenDialog({
         filters: appFilesFilters,
         properties: [
@@ -34,7 +37,10 @@ export function open(): string {
         ]
     });
 
-    if (!files.length) return '';
+    if (!files.length) return null;
 
-    return fs.readFileSync(files[0]).toString();
+    return {
+        file: files[0],
+        contents: fs.readFileSync(files[0]).toString()
+    };
 }
