@@ -2,16 +2,18 @@ import { createStore } from 'redux'
 import { AbstractCanvasObject, NodeMap, EdgeMap } from './types';
 import * as appAPI from './desktop';
 
+interface ProjectData {
+    nodes: NodeMap,
+    edges: EdgeMap,
+    oriented: boolean,
+    nextNodeId: number,
+    nextEdgeId: number
+}
+
 export interface AppState {
     project: {
         file?: string,
-        data: { // this is what will be saved in the project file.
-            nodes: NodeMap,
-            edges: EdgeMap,
-            oriented: boolean,
-            nextNodeId: number,
-            nextEdgeId: number
-        }
+        data: ProjectData // this is what will be saved in the project file.
     },
     selectedObject?: AbstractCanvasObject
 }
@@ -22,7 +24,8 @@ export const CURVE_EDGE = 'CURVE_EDGE';
 export const END_EDGE = 'END_EDGE';
 export const MOVE_NODE = 'MOVE_NODE';
 export const OPEN_PROJECT = 'OPEN_PROJECT';
-export const SAVE_PROJECT_AS = 'SAVE_PROJECT';
+export const SAVE_PROJECT = 'SAVE_PROJECT';
+export const SAVE_PROJECT_AS = 'SAVE_PROJECT_AS';
 export const SELECT_OBJECT = 'SELECT_OBJECT';
 export const SET_NODE_TEXT = 'SET_NODE_TEXT';
 export const SET_EDGE_TEXT = 'SET_EDGE_TEXT';
@@ -122,14 +125,18 @@ const appReducer = function(state = initialState, action): AppState {
                 console.error(e);
             }
             break;
+        case SAVE_PROJECT:
+            if (!state.project.file) {
+                console.error('There is no project file opened.');
+                break;
+            }
+            var serializedData = serializeSaveData(state.project.data);
+            appAPI.save(state.project.file, serializedData);
+            break;
         case SAVE_PROJECT_AS:
             // If saving is cancelled, savedFile is an empty.
-            newState.project.file = appAPI.saveAs(JSON.stringify({
-                ...state.project.data,
-                // Добавим идентификатор нашего формата, чтобы проверять его при 
-                // открытии файла (вдруг нам подсунули не то).
-                stateId: 'graphstate'
-            }));
+            var serializedData = serializeSaveData(state.project.data);
+            newState.project.file = appAPI.saveAs(serializedData);
             break;
         case SELECT_OBJECT:
             newState.selectedObject = action.object;
@@ -192,6 +199,15 @@ function removeEdge(nodes: NodeMap, edges: EdgeMap, id: number): {
 
     delete resultEdges[id];
     return { nodes: resultNodes, edges: resultEdges };
+}
+
+function serializeSaveData(data: ProjectData): string {
+    return JSON.stringify({
+        ...data,
+        // Добавим идентификатор нашего формата, чтобы проверять его при 
+        // открытии файла (вдруг нам подсунули не то).
+        stateId: 'graphstate'
+    })
 }
 
 function isProjectData(value: object): boolean {

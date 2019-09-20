@@ -8,6 +8,10 @@ const appFilesFilters = [{
     name: 'graph'
 }];
 
+export function save(file: string, contents: string) {
+    fs.writeFileSync(file, contents);
+}
+
 /**
  * If saving was cancelled, returns an empty string.
  */
@@ -19,7 +23,7 @@ export function saveAs(contents: string): string {
 
     if (!file) return '';
 
-    fs.writeFileSync(file, contents);
+    save(file, contents);
     return file;
 }
 
