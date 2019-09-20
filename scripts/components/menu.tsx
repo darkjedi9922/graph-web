@@ -1,11 +1,14 @@
 import React from 'react'
+import { Dispatch } from 'redux'
+import { connect } from 'react-redux'
+import { OPEN_PROJECT, SAVE_PROJECT_AS } from '../store';
 
-interface MenuProps {
+interface DispatchProps {
     onOpen: () => void,
     onFileSaveAs: () => void
 }
 
-class Menu extends React.Component<MenuProps> {
+class Menu extends React.Component<DispatchProps> {
     public shouldComponentUpdate(): boolean {
         return false;
     }
@@ -24,4 +27,9 @@ class Menu extends React.Component<MenuProps> {
     }
 }
 
-export default Menu;
+const mapDispatchToProps = (dispatch: Dispatch): DispatchProps => ({
+    onOpen: () => dispatch({ type: OPEN_PROJECT }),
+    onFileSaveAs: () => dispatch({ type: SAVE_PROJECT_AS })
+})
+
+export default connect(null, mapDispatchToProps)(Menu);

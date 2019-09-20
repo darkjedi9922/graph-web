@@ -20,8 +20,6 @@ import {
     CURVE_EDGE,
     SET_NODE_TEXT,
     SET_EDGE_TEXT,
-    OPEN_PROJECT,
-    SAVE_PROJECT_AS,
 } from '../store';
 
 interface GraphState {
@@ -46,8 +44,6 @@ interface DispatchProps {
     curveEdge: (id: number, curve: number) => void,
     endEdge: (edgeId: number, endNodeId: number) => void,
     moveNode: (id: number, pos: Point) => void,
-    openProject: () => void,
-    saveProjectAs: () => void,
     setNodeText: (id: number, text: string) => void,
     setEdgeText: (id: number, text: string) => void,
     selectObject: (object?: AbstractCanvasObject) => void,
@@ -91,10 +87,7 @@ class Graph extends React.Component<StoreProps & DispatchProps, GraphState>
 
         return (
             <div className="app">
-                <Menu
-                    onOpen={this.props.openProject}
-                    onFileSaveAs={this.props.saveProjectAs}
-                ></Menu>
+                <Menu></Menu>
                 <div className="app__graph graph">
                     <SideTools
                         onOrientedChange={this.props.setOriented}
@@ -251,8 +244,6 @@ const mapDispatchToProps = (dispatch: Dispatch, ownProps) => ({
     curveEdge: (id, curve) => dispatch({ type: CURVE_EDGE, id, curve }),
     endEdge: (edgeId, endNodeId) => dispatch({ type: END_EDGE, edgeId, endNodeId }),
     moveNode: (id, pos) => dispatch({ type: MOVE_NODE, id, pos }),
-    openProject: () => dispatch({ type: OPEN_PROJECT }),
-    saveProjectAs: () => dispatch({ type: SAVE_PROJECT_AS }),
     selectObject: (object) => dispatch({ type: SELECT_OBJECT, object }),
     setNodeText: (id, text) => dispatch({ type: SET_NODE_TEXT, id, text }),
     setEdgeText: (id, text) => dispatch({ type: SET_EDGE_TEXT, id, text }),
