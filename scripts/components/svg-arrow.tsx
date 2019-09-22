@@ -36,6 +36,7 @@ class SvgArrow extends React.Component<SvgArrowProps> {
                 ${(start.y + size * -normal.y / (size * 2))}`}
                 onMouseDown={this.props.onMouseDown}
                 onContextMenu={this.props.onContextMenu}
+                className="graph__edge-arrow"
             ></polygon>
         );
     }

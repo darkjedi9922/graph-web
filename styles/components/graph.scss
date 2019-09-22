@@ -26,6 +26,10 @@
         stroke-width: 2px;
         stroke: black;
         color: black;
+
+        &:hover {
+            cursor: pointer;
+        }
     }
 
     &__node-text {
@@ -33,6 +37,10 @@
         -khtml-user-select: none;
         user-select: none;
         cursor: default;
+
+        &:hover {
+            cursor: pointer;
+        }
     }
 
     &__editline {
@@ -47,6 +55,24 @@
         box-sizing: border-box;
         margin-top: 10px;
         outline: none;
+    }
+
+    &__edge {
+        &:hover, &:active {
+            cursor: pointer;
+        }
+    }
+
+    &__edge-text {
+        &:hover {
+            cursor: pointer;
+        }
+    }
+
+    &__edge-arrow {
+        &:hover {
+            cursor: pointer;
+        }
     }
 }
 

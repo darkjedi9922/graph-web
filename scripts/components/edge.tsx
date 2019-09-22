@@ -96,11 +96,13 @@ class Edge extends React.Component<EdgeProps>
         return (
             <g transform={"rotate(" + gmath.toHtmlDeg(degree) + " " + x1 + " " + y1 + ")"} >
                 <path fill="none" d={d} stroke="black" strokeWidth="2"
+                    className="graph__edge"
                     onMouseDown={this.onMouseDown}
                     onContextMenu={this.props.onContextMenu}
                 ></path>
                 {arrowElement}
                 <text x={textCenter.x} y={textCenter.y}
+                    className="graph__edge-text"
                     style={{ userSelect: "none" }}
                     textAnchor="middle" alignmentBaseline="central"
                     transform={mirrorTransform}
