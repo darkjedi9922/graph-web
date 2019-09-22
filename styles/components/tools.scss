@@ -17,6 +17,10 @@
         outline: none;
         margin: 0 5px;
 
+        &:not(:first-of-type) {
+            margin-top: 5px;
+        }
+
         &:hover {
             transition: 0.15s;
             color: $highlighted-color;
@@ -28,10 +32,6 @@
             color: white;
             background: $highlighted-color;
             border-radius: 10%;
-
-            &:not(:first-of-type) {
-                margin-top: 5px;
-            }
 
             &:hover {
                 color: white;
