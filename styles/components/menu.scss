@@ -37,6 +37,13 @@
         &:hover {
             color: #999;
         }
+
+        &--disabled {
+            color: #999;
+            &:hover {
+                cursor: default;
+            }
+        }
     }
 
     &__category:hover &__submenu {

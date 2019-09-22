@@ -10,9 +10,7 @@ interface CanvasProps {
     onNodeClick: (id: number) => void,
     onEdgeClick: (id: number) => void,
     onNodeMove: (id: number, x: number, y: number) => void,
-    onNodeTextChange: (id: number, text: string) => void,
     onEdgeCurve: (id: number, curve: number) => void,
-    onEdgeTextChange: (id: number, text: string) => void,
     onContextMenu: (event: React.MouseEvent, nodeId: number, edgeId: number) => void,
     addedEdgeEndPos: Point
 }
@@ -61,7 +59,6 @@ class Canvas extends React.Component<CanvasProps>
                 className='graph__node'
                 onMove={(x, y) => this.props.onNodeMove(Number.parseInt(id), x, y)}
                 onClick={() => this.props.onNodeClick(Number.parseInt(id))} 
-                onTextChange={(text) => this.props.onNodeTextChange(Number.parseInt(id), text)}
                 onContextMenu={(e) => this.props.onContextMenu(e, Number.parseInt(id), -1)}
             />);
         }
@@ -81,7 +78,6 @@ class Canvas extends React.Component<CanvasProps>
                 nodeRadius={this._isAddedEdge(id) ? 0 : 25}
                 onClick={() => this.props.onEdgeClick(Number.parseInt(id))}
                 onCurve={(curve) => this.props.onEdgeCurve(Number.parseInt(id), curve)}
-                onTextChange={(text) => this.props.onEdgeTextChange(Number.parseInt(id), text)}
                 onContextMenu={(e) => this.props.onContextMenu(e, -1, Number.parseInt(id))}    
             />);
         }

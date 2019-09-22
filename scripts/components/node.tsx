@@ -11,7 +11,6 @@ interface NodeProps {
     onClick: (e: MouseEvent) => void,
     onMove: (x: number, y: number) => void,
     onContextMenu: (e: React.MouseEvent) => void,
-    onTextChange: (text: string) => void
 }
 
 class Node extends React.Component<NodeProps> {

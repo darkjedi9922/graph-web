@@ -1,6 +1,5 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
-const process = require('process');
 
 // Далее создаётся ссылка на объект Window. Это делается для того, чтобы окно не 
 // закрывалось автоматически, когда объект будет обработан сборщиком мусора.

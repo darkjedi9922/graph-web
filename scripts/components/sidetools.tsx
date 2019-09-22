@@ -1,5 +1,8 @@
 import React from 'react'
+import { connect } from 'react-redux';
 import ToolButton from './tool-button';
+import { Store } from 'redux';
+import { AppState } from '../store';
 
 interface SideToolsProps {
     oriented: boolean,
@@ -28,4 +31,10 @@ class SideTools extends React.Component<SideToolsProps> {
     }
 }
 
-export default SideTools
+const mapStateToProps = function(store: AppState) {
+    return {
+        oriented: store.project.data.oriented
+    }
+}
+
+export default connect(mapStateToProps)(SideTools)

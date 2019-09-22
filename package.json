@@ -8,8 +8,9 @@
     "webpack-watch": "cross-env NODE_DEV=true webpack --watch",
     "start": "cross-env NODE_DEV=true electron .",
     "prebuild": "cross-env NODE_DEV=false webpack",
-    "build-win32": "electron-packager . Graph --platform=win32 --arch=ia32 --electron-version=3.1.1 --app-version=1.0.0 --out=build --ignore=build --ignore=node_modules --ignore=scripts --ignore=styles --overwrite",
-    "build-linux": "electron-packager . Graph --platform=linux --arch=ia32 --electron-version=3.1.1 --app-version=1.0.0 --out=build --ignore=build --ignore=node_modules --ignore=scripts --ignore=styles --overwrite"
+    "build-win32": "electron-packager . Graph --platform=win32 --arch=ia32 --electron-version=3.1.13 --app-version=1.0.0 --out=build --ignore=build --ignore=node_modules --ignore=scripts --ignore=styles --overwrite",
+    "build-linux32": "electron-packager . Graph --platform=linux --arch=ia32 --electron-version=3.1.13 --app-version=1.0.0 --out=build --ignore=build --ignore=node_modules --ignore=scripts --ignore=styles --overwrite",
+    "build-linux64": "electron-packager . Graph --platform=linux --arch=x64 --electron-version=3.1.13 --app-version=1.0.0 --out=build --ignore=build --ignore=node_modules --ignore=scripts --ignore=styles --overwrite"
   },
   "author": "Jed Dark",
   "repository": {
@@ -23,10 +24,11 @@
     "@babel/preset-react": "7.0.0",
     "@types/react": "^16.8.19",
     "@types/react-dom": "^16.8.4",
+    "@types/react-redux": "^7.1.2",
     "babel-loader": "^8.0.6",
     "cross-env": "^5.2.0",
     "css-loader": "^2.1.1",
-    "electron": "3.1.1",
+    "electron": "^3.1.1",
     "electron-devtools-installer": "^2.2.4",
     "electron-packager": "13.0.1",
     "electron-prebuilt": "1.4.13",
@@ -38,6 +40,8 @@
     "react": "^16.8.6",
     "react-contextmenu": "^2.11.0",
     "react-dom": "^16.8.6",
+    "react-redux": "^7.1.1",
+    "redux": "^4.0.4",
     "resolve-url-loader": "^3.1.0",
     "sass-loader": "^7.1.0",
     "style-loader": "^0.23.1",
