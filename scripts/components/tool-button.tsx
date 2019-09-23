@@ -8,10 +8,6 @@ interface ToolButtonProps {
 }
 
 class ToolButton extends React.Component<ToolButtonProps> {
-    public shouldComponentUpdate(nextProps: ToolButtonProps): boolean {
-        return nextProps.activated !== this.props.activated;
-    }
-
     public render() {
         const { activated, title, icon } = this.props;
 
