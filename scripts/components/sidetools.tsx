@@ -27,7 +27,7 @@ class SideTools extends React.Component<SideToolsProps> {
                 <ToolButton title="Ориентированность графа" 
                     activated={oriented}
                     icon="exchange"
-                    onChange={(activated) => this.props.setOriented(activated)}
+                    onClick={() => this.props.setOriented(!oriented)}
                 ></ToolButton>
             </div>
         )

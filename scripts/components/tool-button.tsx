@@ -4,7 +4,7 @@ interface ToolButtonProps {
     activated: boolean,
     title: string,
     icon: string;
-    onChange: (activated: boolean) => void
+    onClick: () => void
 }
 
 class ToolButton extends React.Component<ToolButtonProps> {
@@ -18,7 +18,7 @@ class ToolButton extends React.Component<ToolButtonProps> {
         return (
             <button title={title}
                 className={"tools__button" + (activated ? " tools__button--activated" : "")}
-                onClick={() => this.props.onChange(!activated)}
+                onClick={() => this.props.onClick()}
             ><i className={"icon-" + icon}></i></button>
         )
     }
