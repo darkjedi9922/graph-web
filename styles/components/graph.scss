@@ -21,7 +21,6 @@
         border-radius: 100%;
         text-align: center;
         line-height: 50px;
-        font-size: 20px;
         display: inline-block;
         stroke-width: 2px;
         stroke: black;
@@ -37,6 +36,7 @@
         -khtml-user-select: none;
         user-select: none;
         cursor: default;
+        font-size: 16px;
 
         &:hover {
             cursor: pointer;
