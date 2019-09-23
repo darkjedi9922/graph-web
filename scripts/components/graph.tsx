@@ -47,7 +47,6 @@ interface DispatchProps {
     setNodeText: (id: number, text: string) => void,
     setEdgeText: (id: number, text: string) => void,
     selectObject: (object?: AbstractCanvasObject) => void,
-    setOriented: (oriented: boolean) => void,
     removeNode: (id: number) => void,
     removeEdge: (id: number) => void
 }
@@ -89,9 +88,7 @@ class Graph extends React.Component<StoreProps & DispatchProps, GraphState>
             <div className="app">
                 <Menu></Menu>
                 <div className="app__graph graph">
-                    <SideTools
-                        onOrientedChange={this.props.setOriented}
-                    ></SideTools>
+                    <SideTools></SideTools>
                     <div className="canvas graph__canvas">
                         <Canvas ref={this.canvasRef}
                             oriented={this.props.oriented}
@@ -247,7 +244,6 @@ const mapDispatchToProps = (dispatch: Dispatch, ownProps) => ({
     selectObject: (object) => dispatch({ type: SELECT_OBJECT, object }),
     setNodeText: (id, text) => dispatch({ type: SET_NODE_TEXT, id, text }),
     setEdgeText: (id, text) => dispatch({ type: SET_EDGE_TEXT, id, text }),
-    setOriented: (oriented) => dispatch({ type: SET_ORIENTED, oriented }),
     removeNode: (id) => dispatch({ type: REMOVE_NODE, id }),
     removeEdge: (id) => dispatch({ type: REMOVE_EDGE, id })
 } as DispatchProps)

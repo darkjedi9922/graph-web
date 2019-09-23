@@ -1,13 +1,18 @@
 import React from 'react'
 import { connect } from 'react-redux';
 import ToolButton from './tool-button';
-import { Store } from 'redux';
-import { AppState } from '../store';
+import { Dispatch } from 'redux';
+import { AppState, SET_ORIENTED } from '../store';
 
-interface SideToolsProps {
-    oriented: boolean,
-    onOrientedChange: (oriented: boolean) => void
+interface StoreProps {
+    oriented: boolean
 }
+
+interface DispatchProps {
+    setOriented: (oriented: boolean) => void
+}
+
+interface SideToolsProps extends StoreProps, DispatchProps {}
 
 class SideTools extends React.Component<SideToolsProps> {
     public shouldComponentUpdate(nextProps: SideToolsProps) {
@@ -15,26 +20,26 @@ class SideTools extends React.Component<SideToolsProps> {
     }
 
     public render() {
-        const {
-            oriented
-        } = this.props;
+        const oriented = this.props.oriented;
 
         return (
             <div className="tools">
                 <ToolButton title="Ориентированность графа" 
                     activated={oriented}
                     icon="exchange"
-                    onChange={(activated) => this.props.onOrientedChange(activated)}
+                    onChange={(activated) => this.props.setOriented(activated)}
                 ></ToolButton>
             </div>
         )
     }
 }
 
-const mapStateToProps = function(store: AppState) {
-    return {
-        oriented: store.project.data.oriented
-    }
-}
+const mapStateToProps = (store: AppState): StoreProps => ({
+    oriented: store.project.data.oriented
+})
 
-export default connect(mapStateToProps)(SideTools)
+const mapDispatchToProps = (dispatch: Dispatch): DispatchProps => ({
+    setOriented: (oriented) => dispatch({ type: SET_ORIENTED, oriented }),
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(SideTools)
