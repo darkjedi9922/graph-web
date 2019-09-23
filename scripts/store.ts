@@ -4,10 +4,11 @@ import * as appAPI from './desktop';
 
 interface ProjectData {
     nodes: NodeMap,
+    nodeAutoSize: boolean,
     edges: EdgeMap,
     oriented: boolean,
     nextNodeId: number,
-    nextEdgeId: number
+    nextEdgeId: number,
 }
 
 export interface AppState {
@@ -28,6 +29,7 @@ export const SAVE_PROJECT = 'SAVE_PROJECT';
 export const SAVE_PROJECT_AS = 'SAVE_PROJECT_AS';
 export const SELECT_OBJECT = 'SELECT_OBJECT';
 export const SET_NODE_TEXT = 'SET_NODE_TEXT';
+export const SET_NODE_AUTOSIZE = 'SET_NODE_AUTOSIZE';
 export const SET_EDGE_TEXT = 'SET_EDGE_TEXT';
 export const SET_ORIENTED = 'SET_ORIENTED';
 export const REMOVE_NODE = 'REMOVE_NODE';
@@ -38,10 +40,11 @@ const initialState: AppState = {
         file: null,
         data: {
             nodes: {},
+            nodeAutoSize: false,
             edges: {},
             oriented: false,
             nextNodeId: 1,
-            nextEdgeId: 1,
+            nextEdgeId: 1
         }
     },
     selectedObject: null
@@ -145,6 +148,9 @@ const appReducer = function(state = initialState, action): AppState {
             var nodes = { ...state.project.data.nodes };
             nodes[action.id].text = action.text;
             newState.project.data.nodes = nodes;
+            break;
+        case SET_NODE_AUTOSIZE:
+            newState.project.data.nodeAutoSize = action.enabled;
             break;
         case SET_EDGE_TEXT:
             var edges = { ...state.project.data.edges };

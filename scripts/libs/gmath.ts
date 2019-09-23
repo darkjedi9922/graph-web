@@ -1,4 +1,5 @@
 import { Point } from "scripts/types";
+import $ from 'jquery';
 
 export function rotatePoint(point: Point, center: Point, degree: number): Point {
     const rad = 3.14 / 180 * degree;
@@ -37,4 +38,23 @@ export function toHtmlDeg(degree: number): number {
 
 export function toNormalDegree(htmlDegree: number): number {
     return 360 - htmlDegree;
+}
+
+export function textWidth(text: string, font: string) {
+    var f = font || '12px arial',
+        o = $('<div></div>')
+            .text(text)
+            .css({
+                'position': 'absolute',
+                'float': 'left',
+                'white-space': 'nowrap',
+                'visibility': 'hidden',
+                'font': f
+            })
+            .appendTo($('body')),
+        w = o.width();
+
+    o.remove();
+
+    return w;
 }

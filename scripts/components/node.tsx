@@ -1,5 +1,12 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import ClickEngine from '../engines/click-engine';
+import { AppState } from 'scripts/store';
+import { textWidth } from './../libs/gmath';
+
+interface StoreProps {
+    autoSize: boolean
+}
 
 interface NodeProps {
     id: number,
@@ -13,7 +20,12 @@ interface NodeProps {
     onContextMenu: (e: React.MouseEvent) => void,
 }
 
-class Node extends React.Component<NodeProps> {
+interface NodeState {
+    autoRadius?: number;
+    editing: boolean
+}
+
+class Node extends React.Component<StoreProps & NodeProps, NodeState> {
     private moving: {
         startX: number,
         startY: number,
@@ -30,16 +42,21 @@ class Node extends React.Component<NodeProps> {
         }
     }
 
-    shouldComponentUpdate(nextProps: NodeProps): boolean {
+    shouldComponentUpdate(nextProps: StoreProps & NodeProps): boolean {
         return nextProps.cx !== this.props.cx ||
             nextProps.cy !== this.props.cy ||
-            nextProps.text !== this.props.text;
+            nextProps.text !== this.props.text ||
+            nextProps.autoSize !== this.props.autoSize;
     }
 
     render() {
-        const radius = this.props.radius || 25;
+        let radius = this.props.radius;
         const centerX = this.props.cx || radius;
         const centerY = this.props.cy || radius;
+
+        if (this.props.autoSize) {
+            radius = textWidth(this.props.text, '16px "Times New Roman"') / 2 + 5;
+        }
 
         return (
             <g>
@@ -100,4 +117,8 @@ class Node extends React.Component<NodeProps> {
     }
 }
 
-export default Node;
+const mapStateToProps = (state: AppState): StoreProps => ({
+    autoSize: state.project.data.nodeAutoSize
+})
+
+export default connect(mapStateToProps)(Node);

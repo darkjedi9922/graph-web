@@ -1,2 +1,4 @@
 
+.icon-resize-full:before { content: '\e800'; } /* '' */
+.icon-resize-normal:before { content: '\e801'; } /* '' */
 .icon-exchange:before { content: '\f0ec'; } /* '' */
