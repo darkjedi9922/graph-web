@@ -17,11 +17,6 @@ interface DispatchProps {
 interface SideToolsProps extends StoreProps, DispatchProps {}
 
 class SideTools extends React.Component<SideToolsProps> {
-    public shouldComponentUpdate(nextProps: SideToolsProps) {
-        return nextProps.oriented !== this.props.oriented
-            || nextProps.nodeAutoSize !== this.props.nodeAutoSize;
-    }
-
     public render() {
         const oriented = this.props.oriented;
 
