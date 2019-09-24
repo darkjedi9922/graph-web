@@ -34,6 +34,7 @@ class Node extends React.Component<StoreProps & NodeProps, NodeState> {
         listener: (e: MouseEvent) => void
     } = null;
     private clickEngine = new ClickEngine;
+    private textWidth = null;
     
     constructor(props) {
         super(props);
@@ -43,10 +44,16 @@ class Node extends React.Component<StoreProps & NodeProps, NodeState> {
     }
 
     shouldComponentUpdate(nextProps: StoreProps & NodeProps): boolean {
+        let textChanged: boolean = nextProps.text !== this.props.text;
+        let autoSizeChanged: boolean = nextProps.autoSize !== this.props.autoSize;
+        if (nextProps.autoSize && (textChanged || autoSizeChanged)) {
+            this.textWidth = textWidth(nextProps.text, '16px "Times New Roman"');
+        }
+
         return nextProps.cx !== this.props.cx ||
             nextProps.cy !== this.props.cy ||
-            nextProps.text !== this.props.text ||
-            nextProps.autoSize !== this.props.autoSize;
+            textChanged ||
+            autoSizeChanged;
     }
 
     render() {
@@ -55,7 +62,7 @@ class Node extends React.Component<StoreProps & NodeProps, NodeState> {
         const centerY = this.props.cy || radius;
 
         if (this.props.autoSize) {
-            radius = textWidth(this.props.text, '16px "Times New Roman"') / 2 + 5;
+            radius = this.textWidth / 2 + 5;
         }
 
         return (
@@ -78,6 +85,10 @@ class Node extends React.Component<StoreProps & NodeProps, NodeState> {
                 </text>
             </g>
         );
+    }
+
+    componentWillMount() {
+        this.textWidth = textWidth(this.props.text, '16px "Times New Roman"');
     }
 
     onMouseDown(e: React.MouseEvent) {
