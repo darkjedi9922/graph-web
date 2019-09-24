@@ -9,6 +9,7 @@ interface ProjectData {
     oriented: boolean,
     nextNodeId: number,
     nextEdgeId: number,
+    transparentNodes: boolean
 }
 
 export interface AppState {
@@ -32,6 +33,7 @@ export const SET_NODE_TEXT = 'SET_NODE_TEXT';
 export const SET_NODE_AUTOSIZE = 'SET_NODE_AUTOSIZE';
 export const SET_EDGE_TEXT = 'SET_EDGE_TEXT';
 export const SET_ORIENTED = 'SET_ORIENTED';
+export const SET_TRANSPARENT_NODES = 'SET_TRANSPARENT_NODES';
 export const REMOVE_NODE = 'REMOVE_NODE';
 export const REMOVE_EDGE = 'REMOVE_EDGE';
 
@@ -44,7 +46,8 @@ const initialState: AppState = {
             edges: {},
             oriented: false,
             nextNodeId: 1,
-            nextEdgeId: 1
+            nextEdgeId: 1,
+            transparentNodes: false
         }
     },
     selectedObject: null
@@ -159,6 +162,9 @@ const appReducer = function(state = initialState, action): AppState {
             break;
         case SET_ORIENTED:
             newState.project.data.oriented = action.oriented;
+            break;
+        case SET_TRANSPARENT_NODES:
+            newState.project.data.transparentNodes = action.enabled;
             break;
         case REMOVE_NODE:
             var nodes = { ...state.project.data.nodes };

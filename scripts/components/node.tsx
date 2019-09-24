@@ -5,7 +5,8 @@ import { AppState } from 'scripts/store';
 import { textWidth } from './../libs/gmath';
 
 interface StoreProps {
-    autoSize: boolean
+    autoSize: boolean,
+    transparentNodes: boolean
 }
 
 interface NodeProps {
@@ -53,7 +54,8 @@ class Node extends React.Component<StoreProps & NodeProps, NodeState> {
         return nextProps.cx !== this.props.cx ||
             nextProps.cy !== this.props.cy ||
             textChanged ||
-            autoSizeChanged;
+            autoSizeChanged ||
+            nextProps.transparentNodes !== this.props.transparentNodes;
     }
 
     render() {
@@ -68,6 +70,7 @@ class Node extends React.Component<StoreProps & NodeProps, NodeState> {
         return (
             <g>
                 <circle r={radius} cx={centerX} cy={centerY} 
+                    stroke={this.props.transparentNodes ? 'white' : 'black'}
                     className={this.props.className}
                     onMouseDown={this.onMouseDown.bind(this)}
                     onMouseUp={this.onMouseUp.bind(this)}
@@ -129,7 +132,8 @@ class Node extends React.Component<StoreProps & NodeProps, NodeState> {
 }
 
 const mapStateToProps = (state: AppState): StoreProps => ({
-    autoSize: state.project.data.nodeAutoSize
+    autoSize: state.project.data.nodeAutoSize,
+    transparentNodes: state.project.data.transparentNodes
 })
 
 export default connect(mapStateToProps)(Node);
