@@ -1,6 +1,7 @@
 import { createStore } from 'redux'
 import { AbstractCanvasObject, NodeMap, EdgeMap } from './types';
 import * as appAPI from './desktop';
+import { textWidth } from './libs/gmath';
 
 interface ProjectData {
     nodes: NodeMap,
@@ -58,10 +59,12 @@ const appReducer = function(state = initialState, action): AppState {
     switch (action.type) {
         case ADD_NODE:
             var nodes = { ...state.project.data.nodes };
+            var text = state.project.data.nextNodeId.toString();
             nodes[state.project.data.nextNodeId] = {
                 id: state.project.data.nextNodeId,
-                text: state.project.data.nextNodeId.toString(),
-                radius: 25,
+                text: text,
+                radius: state.project.data.nodeAutoSize ? 
+                    textWidth(text, '16px "Times New Roman"') / 2 + 5 : 25,
                 x: action.pos.x,
                 y: action.pos.y,
                 startEdges: [],
@@ -150,10 +153,24 @@ const appReducer = function(state = initialState, action): AppState {
         case SET_NODE_TEXT:
             var nodes = { ...state.project.data.nodes };
             nodes[action.id].text = action.text;
+            if (state.project.data.nodeAutoSize) 
+                nodes[action.id].radius = textWidth(action.text, 
+                    '16px "Times New Roman"') / 2 + 5;
             newState.project.data.nodes = nodes;
             break;
         case SET_NODE_AUTOSIZE:
             newState.project.data.nodeAutoSize = action.enabled;
+            var nodes = { ...state.project.data.nodes };
+            for (const id in nodes) {
+                if (nodes.hasOwnProperty(id)) {
+                    const node = nodes[id];
+                    if (action.enabled)
+                        node.radius = textWidth(node.text, 
+                            '16px "Times New Roman"') / 2 + 5;
+                    else node.radius = 25;
+                }
+            }
+            newState.project.data.nodes = nodes;
             break;
         case SET_EDGE_TEXT:
             var edges = { ...state.project.data.edges };

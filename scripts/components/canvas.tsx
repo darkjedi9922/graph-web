@@ -81,10 +81,9 @@ class Canvas extends React.Component<CanvasProps>
         const result = [];
         for (let id in this.props.edges) {
             const edge = this.props.edges[id];
-            result.push(<Edge key={id} arrow={this.props.oriented}
+            result.push(<Edge key={id} id={parseInt(id)} arrow={this.props.oriented}
                 start={this._getEdgeStartPos(id)} end={this._getEdgeEndPos(id)}
                 curve={edge.curve} text={edge.text}
-                nodeRadius={this._isAddedEdge(id) ? 0 : 25}
                 onClick={() => this.props.selectObject({type: 'edge', id: parseInt(id)})}
                 onCurve={(curve) => this.props.curveEdge(parseInt(id), curve)}
                 onContextMenu={(e) => this.props.onContextMenu(e, -1, Number.parseInt(id))}    

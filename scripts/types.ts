@@ -10,7 +10,7 @@ export interface NodeModel {
 
 export interface EdgeModel {
     startNodeId: number,
-    endNodeId: number,
+    endNodeId: number | null,
     text: string,
     curve: number
 }

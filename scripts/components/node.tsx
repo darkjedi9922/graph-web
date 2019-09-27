@@ -2,7 +2,6 @@ import React from 'react';
 import { connect } from 'react-redux';
 import ClickEngine from '../engines/click-engine';
 import { AppState } from 'scripts/store';
-import { textWidth } from './../libs/gmath';
 
 interface StoreProps {
     autoSize: boolean,
@@ -35,7 +34,6 @@ class Node extends React.Component<StoreProps & NodeProps, NodeState> {
         listener: (e: MouseEvent) => void
     } = null;
     private clickEngine = new ClickEngine;
-    private textWidth = null;
     
     constructor(props) {
         super(props);
@@ -47,9 +45,6 @@ class Node extends React.Component<StoreProps & NodeProps, NodeState> {
     shouldComponentUpdate(nextProps: StoreProps & NodeProps): boolean {
         let textChanged: boolean = nextProps.text !== this.props.text;
         let autoSizeChanged: boolean = nextProps.autoSize !== this.props.autoSize;
-        if (nextProps.autoSize && (textChanged || autoSizeChanged)) {
-            this.textWidth = textWidth(nextProps.text, '16px "Times New Roman"');
-        }
 
         return nextProps.cx !== this.props.cx ||
             nextProps.cy !== this.props.cy ||
@@ -62,10 +57,6 @@ class Node extends React.Component<StoreProps & NodeProps, NodeState> {
         let radius = this.props.radius;
         const centerX = this.props.cx || radius;
         const centerY = this.props.cy || radius;
-
-        if (this.props.autoSize) {
-            radius = this.textWidth / 2 + 5;
-        }
 
         return (
             <g>
@@ -88,10 +79,6 @@ class Node extends React.Component<StoreProps & NodeProps, NodeState> {
                 </text>
             </g>
         );
-    }
-
-    componentWillMount() {
-        this.textWidth = textWidth(this.props.text, '16px "Times New Roman"');
     }
 
     onMouseDown(e: React.MouseEvent) {

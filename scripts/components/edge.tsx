@@ -3,12 +3,18 @@ import SvgArrow from './svg-arrow';
 import ClickEngine from '../engines/click-engine';
 import * as gmath from '../libs/gmath';
 import { Point } from '../types';
+import { connect } from 'react-redux';
+import { AppState } from 'scripts/store';
+
+interface StoreProps {
+    nodeRadius: number
+}
 
 interface EdgeProps {
+    id: number,
     start: Point,
     end: Point,
     curve: number,
-    nodeRadius: number,
     text: string,
     arrow: boolean,
     onClick: () => void,
@@ -16,7 +22,7 @@ interface EdgeProps {
     onContextMenu: (e: React.MouseEvent) => void
 }
 
-class Edge extends React.Component<EdgeProps>
+class Edge extends React.Component<EdgeProps & StoreProps>
 {
     private curving: {
         startX: number,
@@ -36,14 +42,15 @@ class Edge extends React.Component<EdgeProps>
         this.onMouseUp = this.onMouseUp.bind(this);
     }
 
-    shouldComponentUpdate(nextProps: EdgeProps) {
+    shouldComponentUpdate(nextProps: EdgeProps & StoreProps) {
         return nextProps.end.x !== this.props.end.x ||
             nextProps.end.y !== this.props.end.y ||
             nextProps.start.x !== this.props.start.x ||
             nextProps.start.y !== this.props.start.y ||
             nextProps.arrow !== this.props.arrow ||
             nextProps.curve !== this.props.curve ||
-            nextProps.text !== this.props.text;
+            nextProps.text !== this.props.text || 
+            nextProps.nodeRadius !== this.props.nodeRadius;
     }
 
     render() {
@@ -74,8 +81,10 @@ class Edge extends React.Component<EdgeProps>
 
         let arrowElement = null;
         if (this.props.arrow) {
-            const arrowEnd = virtualPath.getPointAtLength(pathLength - nodeRadius);
-            const arrowStart = virtualPath.getPointAtLength(pathLength - nodeRadius - arrowSize);
+            const arrowEndLength = pathLength - nodeRadius;
+            const arrowStartLength = arrowEndLength - arrowSize;
+            const arrowEnd = virtualPath.getPointAtLength(arrowEndLength);
+            const arrowStart = virtualPath.getPointAtLength(arrowStartLength);
             arrowElement = <SvgArrow vector={{start: arrowStart, end: arrowEnd}}
                 size={arrowSize}
                 onMouseDown={this.onMouseDown}
@@ -162,4 +171,12 @@ class Edge extends React.Component<EdgeProps>
     }
 }
 
-export default Edge;
+const mapStateToProps = (state: AppState, ownProps: EdgeProps): StoreProps => {
+    const endNodeId = state.project.data.edges[ownProps.id].endNodeId;
+    const endNode = state.project.data.nodes[endNodeId];
+    return {
+        nodeRadius: endNodeId !== null ? endNode.radius : 0
+    }
+}
+
+export default connect(mapStateToProps)(Edge);
