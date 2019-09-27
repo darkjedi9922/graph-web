@@ -1,16 +1,25 @@
 import React from 'react';
 import Node from './node';
 import Edge from './edge';
-import { NodeMap, EdgeMap, Point } from '../types';
+import { NodeMap, EdgeMap, Point, AbstractCanvasObject } from '../types';
+import { connect } from 'react-redux';
+import { AppState, MOVE_NODE, SELECT_OBJECT, CURVE_EDGE } from '../store';
+import { Dispatch } from 'redux';
 
-interface CanvasProps {
+interface StoreProps {
     nodes: NodeMap,
     edges: EdgeMap,
-    oriented: boolean,
+    oriented: boolean
+}
+
+interface DispatchProps {
+    curveEdge: (id: number, curve: number) => void,
+    moveNode: (id: number, pos: Point) => void,
+    selectObject: (object?: AbstractCanvasObject) => void
+}
+
+interface CanvasProps extends StoreProps, DispatchProps {
     onNodeClick: (id: number) => void,
-    onEdgeClick: (id: number) => void,
-    onNodeMove: (id: number, x: number, y: number) => void,
-    onEdgeCurve: (id: number, curve: number) => void,
     onContextMenu: (event: React.MouseEvent, nodeId: number, edgeId: number) => void,
     addedEdgeEndPos: Point
 }
@@ -57,7 +66,7 @@ class Canvas extends React.Component<CanvasProps>
                 radius={node.radius}
                 cx={node.x} cy={node.y}
                 className='graph__node'
-                onMove={(x, y) => this.props.onNodeMove(Number.parseInt(id), x, y)}
+                onMove={(x, y) => this.props.moveNode(parseInt(id), {x, y})}
                 onClick={() => this.props.onNodeClick(Number.parseInt(id))} 
                 onContextMenu={(e) => this.props.onContextMenu(e, Number.parseInt(id), -1)}
             />);
@@ -76,8 +85,8 @@ class Canvas extends React.Component<CanvasProps>
                 start={this._getEdgeStartPos(id)} end={this._getEdgeEndPos(id)}
                 curve={edge.curve} text={edge.text}
                 nodeRadius={this._isAddedEdge(id) ? 0 : 25}
-                onClick={() => this.props.onEdgeClick(Number.parseInt(id))}
-                onCurve={(curve) => this.props.onEdgeCurve(Number.parseInt(id), curve)}
+                onClick={() => this.props.selectObject({type: 'edge', id: parseInt(id)})}
+                onCurve={(curve) => this.props.curveEdge(parseInt(id), curve)}
                 onContextMenu={(e) => this.props.onContextMenu(e, -1, Number.parseInt(id))}    
             />);
         }
@@ -112,4 +121,17 @@ class Canvas extends React.Component<CanvasProps>
     }
 }
 
-export default Canvas;
+const mapStateToProps = (state: AppState): StoreProps => ({
+    nodes: state.project.data.nodes,
+    edges: state.project.data.edges,
+    oriented: state.project.data.oriented
+})
+
+const mapDispatchToProps = (dispatch: Dispatch): DispatchProps => ({
+    curveEdge: (id, curve) => dispatch({ type: CURVE_EDGE, id, curve }),
+    moveNode: (id, pos) => dispatch({ type: MOVE_NODE, id, pos }),
+    selectObject: (object) => dispatch({ type: SELECT_OBJECT, object })
+})
+
+export default connect(mapStateToProps, mapDispatchToProps, null, 
+    { forwardRef: true })(Canvas);

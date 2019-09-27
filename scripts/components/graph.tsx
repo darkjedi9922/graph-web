@@ -9,15 +9,12 @@ import SideTools from './sidetools';
 import Menu from './menu';
 import {
     AppState,
-    SET_ORIENTED, 
     ADD_NODE,
     ADD_EDGE,
     SELECT_OBJECT,
     REMOVE_NODE,
-    MOVE_NODE,
     REMOVE_EDGE,
     END_EDGE,
-    CURVE_EDGE,
     SET_NODE_TEXT,
     SET_EDGE_TEXT,
 } from '../store';
@@ -33,7 +30,6 @@ interface GraphState {
 interface StoreProps {
     nodes: NodeMap,
     edges: EdgeMap,
-    oriented: boolean,
     nextEdgeId: number,
     selectedObject?: AbstractCanvasObject
 }
@@ -41,9 +37,7 @@ interface StoreProps {
 interface DispatchProps {
     addNode: (pos: Point) => void,
     addEdge: (startNodeId: number, endNodeId?: number) => void,
-    curveEdge: (id: number, curve: number) => void,
     endEdge: (edgeId: number, endNodeId: number) => void,
-    moveNode: (id: number, pos: Point) => void,
     setNodeText: (id: number, text: string) => void,
     setEdgeText: (id: number, text: string) => void,
     selectObject: (object?: AbstractCanvasObject) => void,
@@ -55,7 +49,7 @@ class Graph extends React.Component<StoreProps & DispatchProps, GraphState>
 {
     private lastContextedNodeId: number = -1;
     private lastContextedEdgeId: number = -1;
-    private canvasRef = React.createRef<Canvas>();
+    private canvasRef = React.createRef<typeof Canvas.WrappedComponent.prototype>();
     private canvasContextMenuRef = React.createRef<CanvasContextMenu>();
     private editLineRef = React.createRef<HTMLInputElement>();
 
@@ -71,8 +65,6 @@ class Graph extends React.Component<StoreProps & DispatchProps, GraphState>
         };
 
         this.onNodeClick = this.onNodeClick.bind(this);
-        this.onEdgeClick = this.onEdgeClick.bind(this);
-        this.moveNode = this.moveNode.bind(this);
         this.onCanvasContextMenu = this.onCanvasContextMenu.bind(this);
         this.removeLastContextedNode = this.removeLastContextedNode.bind(this);
         this.onEditLineKeyDown = this.onEditLineKeyDown.bind(this);
@@ -86,18 +78,12 @@ class Graph extends React.Component<StoreProps & DispatchProps, GraphState>
 
         return (
             <div className="app">
-                <Menu></Menu>
+                <Menu/>
                 <div className="app__graph graph">
-                    <SideTools></SideTools>
+                    <SideTools/>
                     <div className="canvas graph__canvas">
                         <Canvas ref={this.canvasRef}
-                            oriented={this.props.oriented}
-                            nodes={this.props.nodes}
-                            edges={this.props.edges}
                             onNodeClick={this.onNodeClick}
-                            onEdgeClick={this.onEdgeClick}
-                            onNodeMove={this.moveNode}
-                            onEdgeCurve={this.props.curveEdge}
                             onContextMenu={this.onCanvasContextMenu}
                             addedEdgeEndPos={
                                 edgeAdding ? { x: edgeAdding.x, y: edgeAdding.y } : null
@@ -185,13 +171,6 @@ class Graph extends React.Component<StoreProps & DispatchProps, GraphState>
         }
     }
 
-    onEdgeClick(id: number) {
-        this.props.selectObject({
-            type: 'edge',
-            id
-        })
-    }
-
     onEditLineKeyDown(e: React.KeyboardEvent) {
         // Enter pressed.
         if (e.keyCode === 13) {
@@ -206,10 +185,6 @@ class Graph extends React.Component<StoreProps & DispatchProps, GraphState>
         let value = this.editLineRef.current.value;
         if (type === 'node') this.props.setNodeText(id, value);
         else this.props.setEdgeText(id, value);
-    }
-
-    moveNode(id, x, y) {
-        this.props.moveNode(id, {x, y});
     }
 
     addNode(options: {pos: Point}) {
@@ -230,7 +205,6 @@ class Graph extends React.Component<StoreProps & DispatchProps, GraphState>
 const mapStateToProps = (state: AppState) => ({
     nodes: state.project.data.nodes,
     edges: state.project.data.edges,
-    oriented: state.project.data.oriented,
     nextEdgeId: state.project.data.nextEdgeId,
     selectedObject: state.selectedObject
 } as StoreProps)
@@ -238,9 +212,7 @@ const mapStateToProps = (state: AppState) => ({
 const mapDispatchToProps = (dispatch: Dispatch, ownProps) => ({
     addNode: (pos) => dispatch({ type: ADD_NODE, pos }),
     addEdge: (startNodeId, endNodeId) => dispatch({ type: ADD_EDGE, startNodeId, endNodeId }),
-    curveEdge: (id, curve) => dispatch({ type: CURVE_EDGE, id, curve }),
     endEdge: (edgeId, endNodeId) => dispatch({ type: END_EDGE, edgeId, endNodeId }),
-    moveNode: (id, pos) => dispatch({ type: MOVE_NODE, id, pos }),
     selectObject: (object) => dispatch({ type: SELECT_OBJECT, object }),
     setNodeText: (id, text) => dispatch({ type: SET_NODE_TEXT, id, text }),
     setEdgeText: (id, text) => dispatch({ type: SET_EDGE_TEXT, id, text }),
